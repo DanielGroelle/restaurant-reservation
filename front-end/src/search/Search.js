@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
 
-function TableForm() {
+function SearchForm() {
     const initialFormData = {
-        table_name: "",
-        capacity: ""
+        first_name: "",
+        mobile_number: "",
+        reservation_date: "",
+        reservation_time: "",
+        people: ""
     };
 
     const [formData, setFormData] = useState({...initialFormData});
@@ -22,26 +25,22 @@ function TableForm() {
         //use axios
         //if promise resolves to an error render that error
         //className="alert alert-danger"
+        
     }
 
     return (
         <div>
             <form className="d-flex flex-column" onSubmit={handleSubmit}>
-                <label htmlFor="table_name">
-                    Table Name
+                <label htmlFor="mobile_number">
+                    Mobile Number
                 </label>
-                <input name="table_name" type="" placeholder="Table Name" required onChange={handleChange}/>
+                <input name="mobile_number" type="text" placeholder="Enter a customer's phone number" onChange={handleChange}/>
 
-                <label htmlFor="capacity">
-                    Capacity
-                </label>
-                <input name="capacity" type="number" placeholder="0" required onChange={handleChange}/>
-                
-                <button type="button" className="btn btn-primary">Submit</button>
-                <button type="button" className="btn btn-secondary">Cancel</button>
+                <button type="button" className="btn btn-primary">Find</button>
+
             </form>
         </div>
     );
 }
 
-export default TableForm;
+export default SearchForm;
