@@ -3,7 +3,6 @@
  *
  * @type {Router}
  */
-
 const router = require("express").Router({ mergeParams: true });
 const controller = require("./reservations.controller");
 const methodNotAllowed = require("../errors/methodNotAllowed");
@@ -15,7 +14,7 @@ router.route("/")
 
 router.route("/:reservationId")
     .get(controller.read)
-    .delete(controller.remove)
+    .delete(controller.destroy)
     .put(controller.update)
     .all(methodNotAllowed);
 
