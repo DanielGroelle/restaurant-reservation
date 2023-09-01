@@ -12,6 +12,46 @@ async function reservationExists(req, res, next) {
   }
 }
 
+function hasFirstName(req, res, next) {
+  const data = req.body.data;
+  if (!data.first_name) {
+    next({message: "First name field missing", status: 400});
+  }
+  next();
+}
+
+function hasMobileNumber(req, res, next) {
+  const data = req.body.data;
+  if (!data.mobile_number) {
+    next({message: "Mobile number field missing", status: 400});
+  }
+  next();
+}
+
+function hasReservationData(req, res, next) {
+  const data = req.body.data;
+  if (!data.reservation_date) {
+    next({message: "Reservation date field missing", status: 400});
+  }
+  next();
+}
+
+function hasReservationTime(req, res, next) {
+  const data = req.body.data;
+  if (!data.reservation_time) {
+    next({message: "Reservation time field missing", status: 400});
+  }
+  next();
+}
+
+function hasPeople(req, res, next) {
+  const data = req.body.data;
+  if (!data.people) {
+    next({message: "People field missing", status: 400});
+  }
+  next();
+}
+
 /**
  * List handler for reservation resources
  */
@@ -53,7 +93,7 @@ async function update(req, res, next) {
 
 module.exports = {
   list,
-  create,
+  create: [hasFirstName, hasMobileNumber, hasReservationData, hasReservationTime, hasPeople, create],
   read: [reservationExists, read],
   destroy: [reservationExists, destroy],
   update: [reservationExists, update]
