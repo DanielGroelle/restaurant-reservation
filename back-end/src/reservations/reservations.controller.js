@@ -28,11 +28,33 @@ function hasMobileNumber(req, res, next) {
   next();
 }
 
-function hasReservationData(req, res, next) {
+function hasReservationDate(req, res, next) {
   const data = req.body.data;
   if (!data.reservation_date) {
     next({message: "Reservation date field missing", status: 400});
   }
+  console.log(data.reservation_date);
+  let dateArray = data.reservation_date.split("-");
+  const year = Number(dateArray[0]);
+  const month = Number(dateArray[1]) - 1; // minus one because date object starts month at 0
+  const day = Number(dateArray[2]);
+  const hour = res.locals.hour;
+  const minute = res.locals.minute;
+
+  const date = new Date(year, month, day, hour, minute);
+  const dayOfWeek = date.getDay();
+  const today = new Date();
+  
+  //if day of week is tuesday
+  if (dayOfWeek === 2) {
+    next({message:"Reservation cannot be on a Tuesday - closed", status: 400});
+  }
+  
+  //if the date given is before today
+  if(date < today) {
+    next({message: "Reservation cannot be in the past", status: 400})
+  }
+
   next();
 }
 
@@ -40,6 +62,29 @@ function hasReservationTime(req, res, next) {
   const data = req.body.data;
   if (!data.reservation_time) {
     next({message: "Reservation time field missing", status: 400});
+  }
+  
+  let timeArray = data.reservation_time.split(":");
+  const hour = Number(timeArray[0]);
+  const minute = Number(timeArray[1]);
+  const time = Number(`${timeArray[0]}${timeArray[1]}`);
+  
+  //for use in hasReservationDate
+  res.locals.hour = hour;
+  res.locals.minute = minute;
+
+  if (hour > 23 || hour < 0) {
+    next({message: "Reservation time must have a valid time", status: 400});
+  }
+  if (minute > 59 || minute < 0) {
+    next({message: "Reservation time must have a valid time", status: 400});
+  }
+
+  if (time < 1030) {
+    next({message: "Reservation cannot be before 10:30 AM", status: 400});
+  }
+  if (time > 2130) {
+    next({message: "Reservation cannot be after 9:30 PM", status: 400});
   }
   next();
 }
@@ -93,7 +138,7 @@ async function update(req, res, next) {
 
 module.exports = {
   list,
-  create: [hasFirstName, hasMobileNumber, hasReservationData, hasReservationTime, hasPeople, create],
+  create: [hasFirstName, hasMobileNumber, hasReservationTime, hasReservationDate, hasPeople, create],
   read: [reservationExists, read],
   destroy: [reservationExists, destroy],
   update: [reservationExists, update]
