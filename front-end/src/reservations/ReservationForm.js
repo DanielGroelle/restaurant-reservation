@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from "react";
+import {fetchJson} from "../utils/api";
+const API_BASE_URL =
+  process.env.REACT_APP_API_BASE_URL || "http://localhost:5001";
 
 function ReservationForm() {
     const initialFormData = {
@@ -20,9 +23,16 @@ function ReservationForm() {
     async function handleSubmit(event) {
         event.preventDefault();
         //update the database with the new card data
-
+        
+        const data = await fetchJson(`${API_BASE_URL}/reservations`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({"data": {...formData}})
+        });
+        console.log("=============", data);
         //make request to api,
-        //use axios
         //if promise resolves to an error render that error
         //className="alert alert-danger"
         //   - The reservation date is a Tuesday as the restaurant is closed on Tuesdays.
@@ -61,7 +71,7 @@ function ReservationForm() {
                 </label>
                 <input name="people" type="number" placeholder="0" required onChange={handleChange}/>
                 
-                <button type="button" className="btn btn-primary">Submit</button>
+                <button type="submit" className="btn btn-primary">Submit</button>
                 <button type="button" className="btn btn-secondary">Cancel</button>
             </form>
         </div>
