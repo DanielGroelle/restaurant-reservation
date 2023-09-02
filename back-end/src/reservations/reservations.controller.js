@@ -25,6 +25,15 @@ function hasMobileNumber(req, res, next) {
   if (!data.mobile_number) {
     next({message: "Mobile number field missing", status: 400});
   }
+
+  let mobileArray = data.mobile_number.split("-");
+  const mobileNumberOne = mobileArray[0];
+  const mobileNumberTwo = mobileArray[1];
+  const mobileNumberThree = mobileArray[2];
+
+  if (mobileNumberOne.length !== 3 || mobileNumberTwo.length !== 3 || mobileNumberThree.length !== 4) {
+    next({message: "Mobile number must be valid", status: 400});
+  }
   next();
 }
 
@@ -33,7 +42,7 @@ function hasReservationDate(req, res, next) {
   if (!data.reservation_date) {
     next({message: "Reservation date field missing", status: 400});
   }
-  console.log(data.reservation_date);
+  
   let dateArray = data.reservation_date.split("-");
   const year = Number(dateArray[0]);
   const month = Number(dateArray[1]) - 1; // minus one because date object starts month at 0
