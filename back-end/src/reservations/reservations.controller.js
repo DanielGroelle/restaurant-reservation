@@ -13,9 +13,12 @@ async function reservationExists(req, res, next) {
 }
 
 function hasFirstName(req, res, next) {
+  //errors array that will be appended to
+  res.locals.errors = [];
+
   const data = req.body.data;
   if (!data.first_name) {
-    next({message: "First name field missing", status: 400});
+    res.locals.errors.push({message: "First name field missing", status: 400});
   }
   next();
 }
@@ -23,7 +26,7 @@ function hasFirstName(req, res, next) {
 function hasMobileNumber(req, res, next) {
   const data = req.body.data;
   if (!data.mobile_number) {
-    next({message: "Mobile number field missing", status: 400});
+    res.locals.errors.push({message: "Mobile number field missing", status: 400});
   }
 
   let mobileArray = data.mobile_number.split("-");
@@ -32,7 +35,7 @@ function hasMobileNumber(req, res, next) {
   const mobileNumberThree = mobileArray[2];
 
   if (mobileNumberOne.length !== 3 || mobileNumberTwo.length !== 3 || mobileNumberThree.length !== 4) {
-    next({message: "Mobile number must be valid", status: 400});
+    res.locals.errors.push({message: "Mobile number must be valid", status: 400});
   }
   next();
 }
@@ -40,7 +43,7 @@ function hasMobileNumber(req, res, next) {
 function hasReservationDate(req, res, next) {
   const data = req.body.data;
   if (!data.reservation_date) {
-    next({message: "Reservation date field missing", status: 400});
+    res.locals.errors.push({message: "Reservation date field missing", status: 400});
   }
   
   let dateArray = data.reservation_date.split("-");
@@ -56,12 +59,12 @@ function hasReservationDate(req, res, next) {
   
   //if day of week is tuesday
   if (dayOfWeek === 2) {
-    next({message:"Reservation cannot be on a Tuesday - closed", status: 400});
+    res.locals.errors.push({message:"Reservation cannot be on a Tuesday - closed", status: 400});
   }
   
   //if the date given is before today
   if(date < today) {
-    next({message: "Reservation cannot be in the past", status: 400})
+    res.locals.errors.push({message: "Reservation must be in the future", status: 400})
   }
 
   next();
@@ -70,7 +73,7 @@ function hasReservationDate(req, res, next) {
 function hasReservationTime(req, res, next) {
   const data = req.body.data;
   if (!data.reservation_time) {
-    next({message: "Reservation time field missing", status: 400});
+    res.locals.errors.push({message: "Reservation time field missing", status: 400});
   }
   
   let timeArray = data.reservation_time.split(":");
@@ -83,17 +86,17 @@ function hasReservationTime(req, res, next) {
   res.locals.minute = minute;
 
   if (hour > 23 || hour < 0) {
-    next({message: "Reservation time must have a valid time", status: 400});
+    res.locals.errors.push({message: "Reservation time must have a valid hour", status: 400});
   }
   if (minute > 59 || minute < 0) {
-    next({message: "Reservation time must have a valid time", status: 400});
+    res.locals.errors.push({message: "Reservation time must have a valid minute", status: 400});
   }
 
   if (time < 1030) {
-    next({message: "Reservation cannot be before 10:30 AM", status: 400});
+    res.locals.errors.push({message: "Reservation cannot be before 10:30 AM", status: 400});
   }
   if (time > 2130) {
-    next({message: "Reservation cannot be after 9:30 PM", status: 400});
+    res.locals.errors.push({message: "Reservation cannot be after 9:30 PM", status: 400});
   }
   next();
 }
@@ -101,7 +104,10 @@ function hasReservationTime(req, res, next) {
 function hasPeople(req, res, next) {
   const data = req.body.data;
   if (!data.people) {
-    next({message: "People field missing", status: 400});
+    res.locals.errors.push({message: "People field missing", status: 400});
+  }
+  if (data.people <= 0) {
+    res.locals.errors.push({message: "Reservation much have at least one person", status: 400});
   }
   next();
 }
@@ -116,9 +122,27 @@ async function list(req, res, next) {
 }
 
 async function create(req, res, next) {
-  const givenReservationData = req.body.data;
-  const data = await reservationsService.create(givenReservationData);
-  res.status(201).json({data});
+  //if we have errors
+  if (res.locals.errors.length > 0) {
+    //if the request came from the frontend
+    if (req.body.data.frontend) {
+      const errorMessage = res.locals.errors.map(err => err.message).join(", ");
+      res.status(400).json({error: errorMessage});
+    }
+    //if the request came from elsewhere
+    else {
+      res.status(400).json({error: res.locals.errors[0].message});
+    }
+  }
+  //if we dont have errors, create the reservation and send back data
+  else {
+    //delete the 'frontend' key so it doesnt interfere with reservation creation
+    if (req.body.data.frontend) delete req.body.data.frontend;
+    
+    const givenReservationData = req.body.data;
+    const data = await reservationsService.create(givenReservationData);
+    res.status(201).json({data});
+  }
 }
 
 async function read(req, res, next) {
