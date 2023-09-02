@@ -1,7 +1,7 @@
 const knex = require("../db/connection");
 
 function list() {
-    return knex("reservations").select("*");
+    return knex("tables").select("*");
 }
 
 module.exports = {

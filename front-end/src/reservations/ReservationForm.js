@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {fetchJson} from "../utils/api";
+import ErrorList from "../layout/ErrorList";
+
 const API_BASE_URL =
   process.env.REACT_APP_API_BASE_URL || "http://localhost:5001";
 
@@ -13,6 +15,7 @@ function ReservationForm() {
     };
 
     const [formData, setFormData] = useState({...initialFormData});
+    const [errors, setErrors] = useState([]);
 
     function handleChange(event) {
         let newFormData = {...formData};
@@ -32,20 +35,24 @@ function ReservationForm() {
                 },
                 body: JSON.stringify({"data": {...formData}})
             });
-            console.log("=============", data);
+            setErrors([]);
         }
         catch(error) {
+            //need to allow for multiple errors
+            //my thinking is, adjust my reservations.controller file to push each error to an array
+            //if we're calling from the frontend, return that array
+            //otherwise, return the first error in the array for the api so the tests pass
+            setErrors([error]);
             console.log(error);
         }
-        
-        //if promise resolves to an error render that error
-        //className="alert alert-danger"
-
     }
 
     return (
         <div>
             <h1>Book Your Reservation</h1>
+            
+            <ErrorList errors={errors}/>
+
             <form className="d-flex flex-column" onSubmit={handleSubmit}>
                 <label htmlFor="first_name">
                     First Name
