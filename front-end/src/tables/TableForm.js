@@ -1,4 +1,8 @@
 import React, { useEffect, useState } from "react";
+import ErrorAlert from "../layout/ErrorAlert";
+
+const API_BASE_URL =
+  process.env.REACT_APP_API_BASE_URL || "http://localhost:5001";
 
 function TableForm() {
     const initialFormData = {
@@ -7,6 +11,7 @@ function TableForm() {
     };
 
     const [formData, setFormData] = useState({...initialFormData});
+    const [error, setError] = useState();
 
     function handleChange(event) {
         let newFormData = {...formData};
@@ -18,13 +23,25 @@ function TableForm() {
         event.preventDefault();
         //update the database with the new card data
 
-        //make request to api,
-        //if promise resolves to an error render that error
-        //className="alert alert-danger"
+        try {
+            const data = await fetchJson(`${API_BASE_URL}/reservations`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({"data": {...formData}})
+            });
+            setError();
+        }
+        catch(error) {
+            setError(error);
+        }
     }
 
     return (
         <div>
+            <ErrorAlert error={error}/>
+            
             <form className="d-flex flex-column" onSubmit={handleSubmit}>
                 <label htmlFor="table_name">
                     Table Name

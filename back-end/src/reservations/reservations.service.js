@@ -17,24 +17,24 @@ async function read(reservationId) {
         .then((data)=>data[0]);
 }
 
+async function update(reservationId, reservationData) {
+    await knex("reservations")
+    .where({"reservation_id": Number(reservationId)})
+    .update(reservationData, ["*"]);
+    
+    return read(reservationId);
+}
+
 async function destroy(reservationId) {
     return knex("reservations")
         .where({"reservation_id": Number(reservationId)})
         .del();
 }
 
-async function update(reservationId, reservationData) {
-    await knex("reservations")
-        .where({"reservation_id": Number(reservationId)})
-        .update(reservationData, ["*"]);
-
-    return read(reservationId);
-}
-
 module.exports = {
     list,
     create,
     read,
-    destroy,
-    update
+    update,
+    destroy
 };
