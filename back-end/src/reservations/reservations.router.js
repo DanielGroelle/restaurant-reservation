@@ -18,4 +18,8 @@ router.route("/:reservationId")
     .put(controller.update)
     .all(methodNotAllowed);
 
+router.route("/:reservationId/status")
+    .put(controller.update)
+    .all(methodNotAllowed);
+
 module.exports = router;

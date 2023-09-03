@@ -3,7 +3,6 @@
  *
  * @type {Router}
  */
-
 const router = require("express").Router({ mergeParams: true });
 const controller = require("./tables.controller");
 const methodNotAllowed = require("../errors/methodNotAllowed");
@@ -15,6 +14,11 @@ router.route("/")
 
 router.route("/:tableId")
     .get(controller.read)
+    .put(controller.update)
+    .delete(controller.destroy)
+    .all(methodNotAllowed);
+
+router.route("/:tableId/seat")
     .put(controller.update)
     .delete(controller.destroy)
     .all(methodNotAllowed);

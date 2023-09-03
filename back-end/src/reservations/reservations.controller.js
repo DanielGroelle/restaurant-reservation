@@ -116,6 +116,7 @@ function hasPeople(req, res, next) {
  * List handler for reservation resources
  */
 async function list(req, res, next) {
+  //need to check if there are queries ?mobile_number=XXX-XXX-XXXX
   res.status(200).json({
     data: await reservationsService.list(),
   });
