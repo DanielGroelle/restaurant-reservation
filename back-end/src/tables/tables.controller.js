@@ -39,7 +39,7 @@ function hasCapacity(req, res, next) {
  */
 async function list(req, res, next) {
   res.status(200).json({
-    data: await reservationsService.list(),
+    data: await tablesService.list(),
   });
 }
 
