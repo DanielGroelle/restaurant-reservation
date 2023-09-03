@@ -150,29 +150,32 @@ async function read(req, res, next) {
   res.status(200).json({data});
 }
 
+async function update(req, res, next) {
+  //
+  //need to add validation to update data
+  //
+  const givenReservationData = req.body.data;
+  const {reservationId} = req.params;
+  const reservationData = {
+    ...res.locals.foundReservation,
+    ...givenReservationData,
+    reservation_id: Number(reservationId)
+  };
+  
+  const data = await reservationsService.update(reservationId, reservationData);
+  res.status(201).json({data});
+}
+
 async function destroy(req, res, next) {
   const {reservationId} = req.params;
   await reservationsService.destroy(reservationId);
   res.sendStatus(204);
 }
 
-async function update(req, res, next) {
-  const givenReservationData = req.body.data;
-  const {reservationId} = req.params;
-  const reservationData = {
-      ...res.locals.foundReservation,
-      ...givenReservationData,
-      reservation_id: Number(reservationId)
-  };
-
-  const data = await reservationsService.update(reservationId, reservationData);
-  res.status(201).json({data});
-}
-
 module.exports = {
   list,
   create: [hasFirstName, hasMobileNumber, hasReservationTime, hasReservationDate, hasPeople, create],
   read: [reservationExists, read],
-  destroy: [reservationExists, destroy],
-  update: [reservationExists, update]
+  update: [reservationExists, update],
+  destroy: [reservationExists, destroy]
 };

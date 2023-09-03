@@ -3,7 +3,7 @@ exports.up = function (knex) {
         table.increments("table_id").primary();
         table.string("table_name",255).notNullable();
         table.integer("capacity").notNullable();
-        table.integer("reservation_id").notNullable();
+        table.integer("reservation_id").defaultTo(null);
         table.foreign("reservation_id").references("reservations.reservation_id");
         table.timestamps(true, true);
     });

@@ -19,7 +19,6 @@ function TableForm() {
         //update the database with the new card data
 
         //make request to api,
-        //use axios
         //if promise resolves to an error render that error
         //className="alert alert-danger"
     }
