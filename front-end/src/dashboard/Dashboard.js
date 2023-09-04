@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { listReservations } from "../utils/api";
+import { listReservations, listTables } from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
+import ReservationsList from "../reservations/ReservationsList";
+import TablesList from "../tables/TablesList";
 
 /**
  * Defines the dashboard page.
@@ -11,6 +13,8 @@ import ErrorAlert from "../layout/ErrorAlert";
 function Dashboard({ date }) {
   const [reservations, setReservations] = useState([]);
   const [reservationsError, setReservationsError] = useState(null);
+  const [tables, setTables] = useState([]);
+  const [tablesError, setTablesError] = useState(null);
 
   useEffect(loadDashboard, [date]);
 
@@ -20,19 +24,23 @@ function Dashboard({ date }) {
     listReservations({ date }, abortController.signal)
       .then(setReservations)
       .catch(setReservationsError);
+    listTables()
+      .then(setTables)
+      .catch(setTablesError);
     return () => abortController.abort();
   }
 
   return (
     <main>
       <h1>Dashboard</h1>
-      <div className="d-md-flex mb-3">
+      <div className="d-flex flex-column mb-3">
         <h4 className="mb-0">Reservations for date</h4>
+        <ErrorAlert error={reservationsError} />
+        <ReservationsList reservations={reservations}/>
       </div>
-      <ErrorAlert error={reservationsError} />
-      {JSON.stringify(reservations)}
-      <div className="d-md-flex mb-3">
+      <div className="d-flex flex-column mb-3">
         <h4>Tables</h4>
+        <TablesList tables={tables}/>
       </div>
     </main>
   );
