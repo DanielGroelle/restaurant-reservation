@@ -2,13 +2,18 @@ const reservationsService = require("./reservations.service");
 
 async function reservationExists(req, res, next) {
   const {reservationId} = req.params;
-  res.locals.foundReservation = await reservationsService.read(reservationId);
+  
+  //if we have a reservationId
+  if (!isNaN(Number(reservationId))) {
+    res.locals.foundReservation = await reservationsService.read(reservationId);
+  }
+  //if the reservation was found
   if (res.locals.foundReservation) {
-      next();
+    next();
   }
   //if it doesnt exist return an error
   else {
-      next({message: `reservation id not found: ${reservationId}`, status: 404});
+    next({message: `reservation id not found: ${reservationId}`, status: 404});
   }
 }
 
@@ -178,19 +183,34 @@ async function read(req, res, next) {
 }
 
 async function update(req, res, next) {
-  //
-  //need to add validation to update data
-  //
-  const givenReservationData = req.body.data;
-  const {reservationId} = req.params;
-  const reservationData = {
-    ...res.locals.foundReservation,
-    ...givenReservationData,
-    reservation_id: Number(reservationId)
-  };
-  
-  const data = await reservationsService.update(reservationId, reservationData);
-  res.status(201).json({data});
+  //if we have errors
+  if (res.locals.errors.length > 0) {
+    //if the request came from the frontend
+    if (req.body.data.frontend) {
+      const errorMessage = res.locals.errors.map(err => err.message).join(", ");
+      res.status(400).json({error: errorMessage});
+    }
+    //if the request came from elsewhere
+    else {
+      res.status(400).json({error: res.locals.errors[0].message});
+    }
+  }
+  //if we dont have errors, update the reservation and send back data
+  else {
+    //delete the 'frontend' key so it doesnt interfere with reservation creation
+    if (req.body.data.frontend) delete req.body.data.frontend;
+    
+    const givenReservationData = req.body.data;
+    const {reservationId} = req.params;
+    const reservationData = {
+      ...res.locals.foundReservation,
+      ...givenReservationData,
+      reservation_id: Number(reservationId)
+    };
+    
+    const data = await reservationsService.update(reservationId, reservationData);
+    res.status(201).json({data});
+  }
 }
 
 async function destroy(req, res, next) {
@@ -203,6 +223,6 @@ module.exports = {
   list,
   create: [hasFirstName, hasLastName, hasMobileNumber, hasReservationTime, hasReservationDate, hasPeople, create],
   read: [reservationExists, read],
-  update: [reservationExists, update],
+  update: [reservationExists, hasFirstName, hasLastName, hasMobileNumber, hasReservationTime, hasReservationDate, hasPeople, update],
   destroy: [reservationExists, destroy]
 };

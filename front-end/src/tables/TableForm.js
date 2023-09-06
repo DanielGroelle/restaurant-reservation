@@ -3,10 +3,10 @@ import {Link, useHistory} from "react-router-dom";
 import {fetchJson} from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
 
-const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || "http://localhost:5001";
-
 function TableForm() {
+    const API_BASE_URL =
+      process.env.REACT_APP_API_BASE_URL || "http://localhost:5001";
+    
     const initialFormData = {
         table_name: "",
         capacity: ""
