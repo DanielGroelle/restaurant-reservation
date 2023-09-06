@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import {Link, useHistory} from "react-router-dom";
 import {fetchJson} from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
 
@@ -12,8 +13,9 @@ function ReservationForm() {
         mobile_number: "",
         reservation_date: "",
         reservation_time: "",
-        people: ""
+        people: 0
     };
+    let history = useHistory();
 
     const [formData, setFormData] = useState({...initialFormData});
     const [error, setError] = useState();
@@ -37,6 +39,7 @@ function ReservationForm() {
                 body: JSON.stringify({"data": {...formData, frontend: true}}) //frontend set to true so we get all errors from the api
             });
             setError();
+            history.push("/dashboard");
         }
         catch(error) {
             setError(error);
@@ -81,7 +84,7 @@ function ReservationForm() {
                 <input name="people" type="number" placeholder="0" required onChange={handleChange}/>
                 
                 <button type="submit" className="btn btn-primary">Submit</button>
-                <button type="button" className="btn btn-secondary">Cancel</button>
+                <Link to="/dashboard" type="button" className="btn btn-secondary">Cancel</Link>
             </form>
         </div>
     );

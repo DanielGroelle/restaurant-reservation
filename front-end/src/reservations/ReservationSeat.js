@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
-import {useParams} from "react-router-dom";
+import {useParams, Link, useHistory} from "react-router-dom";
 import {fetchJson, listTables} from "../utils/api";
 import TableSelect from "../tables/TableSelect";
 import ErrorAlert from "../layout/ErrorAlert";
 
-const API_BASE_URL =
-    process.env.REACT_APP_API_BASE_URL || "http://localhost:5001";
 
 function ReservationSeat() {
+    const API_BASE_URL =
+        process.env.REACT_APP_API_BASE_URL || "http://localhost:5001";
     const {reservation_id} = useParams();
+    let history = useHistory();
 
     const initialFormData = {
         table_id: "0",
@@ -16,7 +17,7 @@ function ReservationSeat() {
 
     const [formData, setFormData] = useState({...initialFormData});
     const [error, setError] = useState();
-    const [tables, setTables] = useState([{table_name:"hi", table_id:99, capacity:5}]);
+    const [tables, setTables] = useState([{table_name:"", table_id:99, capacity:0}]);
 
     useEffect(()=>{
         //maybe start using these idk
@@ -51,6 +52,7 @@ function ReservationSeat() {
                 body: JSON.stringify({"data": {reservation_id}})
             });
             setError();
+            history.push("/dashboard");
         }
         catch(error) {
             setError(error);
@@ -65,7 +67,7 @@ function ReservationSeat() {
                     {tables.map((table)=><TableSelect table={table} key={table.table_id}/>)}
                 </select>
                 <button type="submit" className="btn btn-secondary">Submit</button>
-                <button className="btn btn-secondary">Cancel</button>
+                <Link to="/dashboard" className="btn btn-secondary">Cancel</Link>
             </form>
         </div>
     );

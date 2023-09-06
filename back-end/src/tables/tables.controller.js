@@ -55,7 +55,6 @@ async function read(req, res, next) {
 }
 
 async function update(req, res, next) {
-  console.log("hiii");
   const givenTableData = req.body.data;
   const {tableId} = req.params;
   const tableData = {

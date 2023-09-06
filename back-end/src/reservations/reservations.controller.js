@@ -124,7 +124,7 @@ function hasPeople(req, res, next) {
   if (!data.people) {
     res.locals.errors.push({message: "people field missing", status: 400});
   }
-  if (typeof data.people !== Number) {
+  if (isNaN(Number(data.people))) {
     res.locals.errors.push({message: "people field must be a number", status: 400});
   }
   if (data.people <= 0) {

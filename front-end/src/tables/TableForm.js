@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import {Link, useHistory} from "react-router-dom";
 import {fetchJson} from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
 
@@ -10,6 +11,7 @@ function TableForm() {
         table_name: "",
         capacity: ""
     };
+    let history = useHistory();
 
     const [formData, setFormData] = useState({...initialFormData});
     const [error, setError] = useState();
@@ -33,6 +35,7 @@ function TableForm() {
                 body: JSON.stringify({"data": {...formData}})
             });
             setError();
+            history.push("/dashboard");
         }
         catch(error) {
             setError(error);
@@ -55,7 +58,7 @@ function TableForm() {
                 <input name="capacity" type="number" placeholder="0" required onChange={handleChange}/>
                 
                 <button type="button" className="btn btn-primary">Submit</button>
-                <button type="button" className="btn btn-secondary">Cancel</button>
+                <Link to="/dashboard" type="button" className="btn btn-secondary">Cancel</Link>
             </form>
         </div>
     );
