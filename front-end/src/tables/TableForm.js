@@ -25,7 +25,7 @@ function TableForm() {
         //update the database with the new card data
 
         try {
-            const data = await fetchJson(`${API_BASE_URL}/reservations`, {
+            await fetchJson(`${API_BASE_URL}/reservations`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

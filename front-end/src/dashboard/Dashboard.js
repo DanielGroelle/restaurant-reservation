@@ -40,8 +40,8 @@ function Dashboard({ date }) {
       </div>
       <div className="d-flex flex-column mb-3">
         <h4>Tables</h4>
-        <TablesList tables={tables}/>
         <ErrorAlert error={tablesError}/>
+        <TablesList tables={tables}/>
       </div>
     </main>
   );

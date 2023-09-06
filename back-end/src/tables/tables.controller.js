@@ -55,6 +55,7 @@ async function read(req, res, next) {
 }
 
 async function update(req, res, next) {
+  console.log("hiii");
   const givenTableData = req.body.data;
   const {tableId} = req.params;
   const tableData = {
@@ -62,7 +63,7 @@ async function update(req, res, next) {
     ...givenTableData,
     table_id: Number(tableId)
   };
-  
+
   const data = await tablesService.update(tableId, tableData);
   res.status(201).json({data});
 }
