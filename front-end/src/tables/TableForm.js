@@ -27,7 +27,7 @@ function TableForm() {
         //update the database with the new card data
 
         try {
-            await fetchJson(`${API_BASE_URL}/reservations`, {
+            await fetchJson(`${API_BASE_URL}/tables`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -57,7 +57,7 @@ function TableForm() {
                 </label>
                 <input name="capacity" type="number" placeholder="0" required onChange={handleChange}/>
                 
-                <button type="button" className="btn btn-primary">Submit</button>
+                <button type="submit" className="btn btn-primary">Submit</button>
                 <Link to="/dashboard" type="button" className="btn btn-secondary">Cancel</Link>
             </form>
         </div>
