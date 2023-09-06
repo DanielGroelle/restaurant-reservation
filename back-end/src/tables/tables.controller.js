@@ -15,10 +15,10 @@ async function tableExists(req, res, next) {
 function hasTableName(req, res, next) {
   const data = req.body.data;
   if (!data.table_name) {
-    next({message: "Table name field missing", status: 400});
+    next({message: "table_name field missing", status: 400});
   }
   if(data.table_name.length < 2) {
-    next({message: "Table name must be at least two characters long", status: 400})
+    next({message: "table_name must be at least two characters long", status: 400})
   }
   next();
 }

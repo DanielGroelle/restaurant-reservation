@@ -7,7 +7,8 @@ async function list() {
 
 async function create(reservationData) {
     return knex("reservations")
-        .insert(reservationData, ["*"]);
+        .insert(reservationData, ["*"])
+        .then((data)=>data[0]);
 }
 
 async function read(reservationId) {

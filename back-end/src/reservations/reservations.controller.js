@@ -8,7 +8,7 @@ async function reservationExists(req, res, next) {
   }
   //if it doesnt exist return an error
   else {
-      next({message: `Reservation id not found: ${reservationId}`, status: 404});
+      next({message: `reservation id not found: ${reservationId}`, status: 404});
   }
 }
 
@@ -18,7 +18,15 @@ function hasFirstName(req, res, next) {
 
   const data = req.body.data;
   if (!data.first_name) {
-    res.locals.errors.push({message: "First name field missing", status: 400});
+    res.locals.errors.push({message: "first_name field missing", status: 400});
+  }
+  next();
+}
+
+function hasLastName(req, res, next) {
+  const data = req.body.data;
+  if (!data.last_name) {
+    res.locals.errors.push({message: "last_name field missing", status: 400});
   }
   next();
 }
@@ -26,16 +34,16 @@ function hasFirstName(req, res, next) {
 function hasMobileNumber(req, res, next) {
   const data = req.body.data;
   if (!data.mobile_number) {
-    res.locals.errors.push({message: "Mobile number field missing", status: 400});
+    res.locals.errors.push({message: "mobile_number field missing", status: 400});
   }
-
-  let mobileArray = data.mobile_number.split("-");
-  const mobileNumberOne = mobileArray[0];
-  const mobileNumberTwo = mobileArray[1];
-  const mobileNumberThree = mobileArray[2];
+  
+  let mobileArray = data.mobile_number?.split("-") ?? [];
+  const mobileNumberOne = mobileArray[0] ?? "";
+  const mobileNumberTwo = mobileArray[1] ?? "";
+  const mobileNumberThree = mobileArray[2] ?? "";
 
   if (mobileNumberOne.length !== 3 || mobileNumberTwo.length !== 3 || mobileNumberThree.length !== 4) {
-    res.locals.errors.push({message: "Mobile number must be valid", status: 400});
+    res.locals.errors.push({message: "mobile_number must be valid", status: 400});
   }
   next();
 }
@@ -43,15 +51,25 @@ function hasMobileNumber(req, res, next) {
 function hasReservationDate(req, res, next) {
   const data = req.body.data;
   if (!data.reservation_date) {
-    res.locals.errors.push({message: "Reservation date field missing", status: 400});
+    res.locals.errors.push({message: "reservation_date field missing", status: 400});
   }
   
-  let dateArray = data.reservation_date.split("-");
+  let dateArray = data.reservation_date?.split("-") ?? ["", "", ""];
   const year = Number(dateArray[0]);
   const month = Number(dateArray[1]) - 1; // minus one because date object starts month at 0
   const day = Number(dateArray[2]);
   const hour = res.locals.hour;
   const minute = res.locals.minute;
+
+  if (dateArray[0].length !== 4) {
+    res.locals.errors.push({message:"reservation_date must have a valid year", status: 400});
+  }
+  if (dateArray[1].length !== 2 || month < 0 || month > 11) {
+    res.locals.errors.push({message:"reservation_date must have a valid month", status: 400});
+  }
+  if (dateArray[2].length !== 2 || day <= 0 || day > 31) {
+    res.locals.errors.push({message:"reservation_date must have a valid day", status: 400});
+  }
 
   const date = new Date(year, month, day, hour, minute);
   const dayOfWeek = date.getDay();
@@ -59,12 +77,12 @@ function hasReservationDate(req, res, next) {
   
   //if day of week is tuesday
   if (dayOfWeek === 2) {
-    res.locals.errors.push({message:"Reservation cannot be on a Tuesday - closed", status: 400});
+    res.locals.errors.push({message:"reservation cannot be on a Tuesday - closed", status: 400});
   }
   
   //if the date given is before today
   if(date < today) {
-    res.locals.errors.push({message: "Reservation must be in the future", status: 400})
+    res.locals.errors.push({message: "reservation must be in the future", status: 400})
   }
 
   next();
@@ -73,10 +91,10 @@ function hasReservationDate(req, res, next) {
 function hasReservationTime(req, res, next) {
   const data = req.body.data;
   if (!data.reservation_time) {
-    res.locals.errors.push({message: "Reservation time field missing", status: 400});
+    res.locals.errors.push({message: "reservation_time field missing", status: 400});
   }
-  
-  let timeArray = data.reservation_time.split(":");
+
+  let timeArray = data.reservation_time?.split(":") ?? [];
   const hour = Number(timeArray[0]);
   const minute = Number(timeArray[1]);
   const time = Number(`${timeArray[0]}${timeArray[1]}`);
@@ -86,17 +104,17 @@ function hasReservationTime(req, res, next) {
   res.locals.minute = minute;
 
   if (hour > 23 || hour < 0) {
-    res.locals.errors.push({message: "Reservation time must have a valid hour", status: 400});
+    res.locals.errors.push({message: "reservation_time must have a valid hour", status: 400});
   }
   if (minute > 59 || minute < 0) {
-    res.locals.errors.push({message: "Reservation time must have a valid minute", status: 400});
+    res.locals.errors.push({message: "reservation_time must have a valid minute", status: 400});
   }
 
   if (time < 1030) {
-    res.locals.errors.push({message: "Reservation cannot be before 10:30 AM", status: 400});
+    res.locals.errors.push({message: "reservation cannot be before 10:30 AM", status: 400});
   }
   if (time > 2130) {
-    res.locals.errors.push({message: "Reservation cannot be after 9:30 PM", status: 400});
+    res.locals.errors.push({message: "reservation cannot be after 9:30 PM", status: 400});
   }
   next();
 }
@@ -104,10 +122,13 @@ function hasReservationTime(req, res, next) {
 function hasPeople(req, res, next) {
   const data = req.body.data;
   if (!data.people) {
-    res.locals.errors.push({message: "People field missing", status: 400});
+    res.locals.errors.push({message: "people field missing", status: 400});
+  }
+  if (typeof data.people !== Number) {
+    res.locals.errors.push({message: "people field must be a number", status: 400});
   }
   if (data.people <= 0) {
-    res.locals.errors.push({message: "Reservation much have at least one person", status: 400});
+    res.locals.errors.push({message: "reservation must have at least one person", status: 400});
   }
   next();
 }
@@ -117,12 +138,17 @@ function hasPeople(req, res, next) {
  */
 async function list(req, res, next) {
   //need to check if there are queries ?mobile_number=XXX-XXX-XXXX
+  //needs to sort reservations by time (oldest first)
   res.status(200).json({
     data: await reservationsService.list(),
   });
 }
 
 async function create(req, res, next) {
+  if (!req.body.data) {
+    res.locals.errors.push({message: "Missing data", status: 400});
+  }
+
   //if we have errors
   if (res.locals.errors.length > 0) {
     //if the request came from the frontend
@@ -175,7 +201,7 @@ async function destroy(req, res, next) {
 
 module.exports = {
   list,
-  create: [hasFirstName, hasMobileNumber, hasReservationTime, hasReservationDate, hasPeople, create],
+  create: [hasFirstName, hasLastName, hasMobileNumber, hasReservationTime, hasReservationDate, hasPeople, create],
   read: [reservationExists, read],
   update: [reservationExists, update],
   destroy: [reservationExists, destroy]

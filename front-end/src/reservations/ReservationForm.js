@@ -8,6 +8,7 @@ const API_BASE_URL =
 function ReservationForm() {
     const initialFormData = {
         first_name: "",
+        last_name: "",
         mobile_number: "",
         reservation_date: "",
         reservation_time: "",
@@ -53,6 +54,11 @@ function ReservationForm() {
                     First Name
                 </label>
                 <input name="first_name" type="text" placeholder="First Name" required onChange={handleChange}/>
+                
+                <label htmlFor="last_name">
+                    Last Name
+                </label>
+                <input name="last_name" type="text" placeholder="Last Name" required onChange={handleChange}/>
                 
                 <label htmlFor="mobile_number">
                     Mobile Number
