@@ -8,12 +8,17 @@ async function tableExists(req, res, next) {
   }
   //if it doesnt exist return an error
   else {
-      next({message: `Table id not found: ${tableId}`, status: 404});
+      next({message: `table id not found: ${tableId}`, status: 404});
   }
 }
 
 function hasTableName(req, res, next) {
   const data = req.body.data;
+
+  if(!data) {
+    next({message: "data missing", status: 400});
+  }
+
   if (!data.table_name) {
     next({message: "table_name field missing", status: 400});
   }
@@ -26,10 +31,13 @@ function hasTableName(req, res, next) {
 function hasCapacity(req, res, next) {
   const data = req.body.data;
   if (!data.capacity) {
-    next({message: "Capacity field missing", status: 400});
+    next({message: "capacity field missing", status: 400});
   }
+  if (typeof data.capacity !== "number") {
+    next({message: "capacity must be a number", status: 400});
+  } 
   if (data.capacity <= 0) {
-    next({message: "Table much have a capacity of at least one", status: 400});
+    next({message: "table much have a capacity of at least one", status: 400});
   }
   next();
 }

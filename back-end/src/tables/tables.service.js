@@ -7,7 +7,8 @@ async function list() {
 
 async function create(tableData) {
     return knex("tables")
-        .insert(tableData, ["*"]);
+        .insert(tableData, ["*"])
+        .then((data)=>data[0]);
 }
 
 async function read(tableId) {

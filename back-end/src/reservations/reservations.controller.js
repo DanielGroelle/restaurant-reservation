@@ -22,7 +22,12 @@ function hasFirstName(req, res, next) {
   res.locals.errors = [];
 
   const data = req.body.data;
-  if (!data.first_name) {
+
+  if(!data) {
+    next({message: "data missing", status: 400});
+  }
+
+  if (!data?.first_name) {
     res.locals.errors.push({message: "first_name field missing", status: 400});
   }
   next();
@@ -55,7 +60,7 @@ function hasMobileNumber(req, res, next) {
 
 function hasReservationDate(req, res, next) {
   const data = req.body.data;
-  if (!data.reservation_date) {
+  if (!data.reservation_date || data.reservation_date === "") {
     res.locals.errors.push({message: "reservation_date field missing", status: 400});
   }
   
@@ -66,14 +71,19 @@ function hasReservationDate(req, res, next) {
   const hour = res.locals.hour;
   const minute = res.locals.minute;
 
-  if (dateArray[0].length !== 4) {
-    res.locals.errors.push({message:"reservation_date must have a valid year", status: 400});
+  if(!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+    if (dateArray[0].length !== 4) {
+      res.locals.errors.push({message:"reservation_date must have a valid year", status: 400});
+    }
+    if (dateArray[1].length !== 2 || month < 0 || month > 11) {
+      res.locals.errors.push({message:"reservation_date must have a valid month", status: 400});
+    }
+    if (dateArray[2].length !== 2 || day <= 0 || day > 31) {
+      res.locals.errors.push({message:"reservation_date must have a valid day", status: 400});
+    }
   }
-  if (dateArray[1].length !== 2 || month < 0 || month > 11) {
-    res.locals.errors.push({message:"reservation_date must have a valid month", status: 400});
-  }
-  if (dateArray[2].length !== 2 || day <= 0 || day > 31) {
-    res.locals.errors.push({message:"reservation_date must have a valid day", status: 400});
+  else {
+    res.locals.errors.push({message: "reservation_date must be valid", status: 400});
   }
 
   const date = new Date(year, month, day, hour, minute);
@@ -82,7 +92,7 @@ function hasReservationDate(req, res, next) {
   
   //if day of week is tuesday
   if (dayOfWeek === 2) {
-    res.locals.errors.push({message:"reservation cannot be on a Tuesday - closed", status: 400});
+    res.locals.errors.push({message:"reservation cannot be on a tuesday - closed", status: 400});
   }
   
   //if the date given is before today
@@ -103,7 +113,12 @@ function hasReservationTime(req, res, next) {
   const hour = Number(timeArray[0]);
   const minute = Number(timeArray[1]);
   const time = Number(`${timeArray[0]}${timeArray[1]}`);
-  
+
+  //checking that the time is valid
+  if(isNaN(hour) || isNaN(minute)) {
+    res.locals.errors.push({message: "reservation_time field must be a valid time", status: 400});
+  }
+
   //for use in hasReservationDate
   res.locals.hour = hour;
   res.locals.minute = minute;
@@ -129,7 +144,7 @@ function hasPeople(req, res, next) {
   if (!data.people) {
     res.locals.errors.push({message: "people field missing", status: 400});
   }
-  if (isNaN(Number(data.people))) {
+  if (typeof data.people !== "number") {
     res.locals.errors.push({message: "people field must be a number", status: 400});
   }
   if (data.people <= 0) {
@@ -150,10 +165,6 @@ async function list(req, res, next) {
 }
 
 async function create(req, res, next) {
-  if (!req.body.data) {
-    res.locals.errors.push({message: "Missing data", status: 400});
-  }
-
   //if we have errors
   if (res.locals.errors.length > 0) {
     //if the request came from the frontend

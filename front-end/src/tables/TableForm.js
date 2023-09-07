@@ -32,7 +32,7 @@ function TableForm() {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({"data": {...formData}})
+                body: JSON.stringify({"data": {...formData, capacity: Number(formData.capacity)}})
             });
             setError();
             history.push("/dashboard");

@@ -15,7 +15,7 @@ function ReservationForm({edit}) {
         mobile_number: "",
         reservation_date: "",
         reservation_time: "",
-        people: 0
+        people: ""
     };
 
     const [formData, setFormData] = useState({...initialFormData});
@@ -33,7 +33,7 @@ function ReservationForm({edit}) {
                     mobile_number: data.mobile_number,
                     reservation_date: data.reservation_date.slice(0, 10),
                     reservation_time: data.reservation_time.slice(0, 5),
-                    people: data.people
+                    people: Number(data.people)
                 });
             })();
         }
@@ -57,7 +57,8 @@ function ReservationForm({edit}) {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({"data": {...formData, frontend: true}}) //frontend set to true so we get all errors from the api
+                body: JSON.stringify({"data": {...formData, people: Number(formData.people), frontend: true}})
+                //frontend set to true so we get all errors from the api
             });
             setError();
             history.push("/dashboard");
