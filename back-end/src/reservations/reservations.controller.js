@@ -95,9 +95,9 @@ function hasReservationDate(req, res, next) {
     res.locals.errors.push({message:"reservation cannot be on a tuesday - closed", status: 400});
   }
   
-  //if the date given is before today
-  if(date < today) {
-    res.locals.errors.push({message: "reservation must be in the future", status: 400})
+  //if the date given is before today, only if we're not updating
+  if(date < today && !res.locals.foundReservation) {
+    res.locals.errors.push({message: "reservation must be in the future", status: 400});
   }
 
   next();

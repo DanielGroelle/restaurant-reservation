@@ -1,4 +1,5 @@
 const tablesService = require("./tables.service");
+const reservationsService = require("../reservations/reservations.service");
 
 async function tableExists(req, res, next) {
   const {tableId} = req.params;
@@ -18,11 +19,11 @@ function hasTableName(req, res, next) {
   if(!data) {
     next({message: "data missing", status: 400});
   }
-
+  console.log("table_name",data.table_name);
   if (!data.table_name) {
     next({message: "table_name field missing", status: 400});
   }
-  if(data.table_name.length < 2) {
+  if(data.table_name?.length < 2) {
     next({message: "table_name must be at least two characters long", status: 400})
   }
   next();
@@ -70,6 +71,13 @@ async function update(req, res, next) {
     ...givenTableData,
     table_id: Number(tableId)
   };
+
+  if (givenTableData.reservation_id) {
+    const reservationData = await reservationsService.read(givenTableData.reservation_id);
+    await reservationsService.update(givenTableData.reservation_id, {
+      status: "seated"
+    }); 
+  }
 
   const data = await tablesService.update(tableId, tableData);
   res.status(201).json({data});
