@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import {Link, useHistory} from "react-router-dom";
+import {useHistory} from "react-router-dom";
 import {fetchJson} from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
 
@@ -58,7 +58,7 @@ function TableForm() {
                 <input name="capacity" type="number" placeholder="0" required onChange={handleChange}/>
                 
                 <button type="submit" className="btn btn-primary">Submit</button>
-                <Link to="/dashboard" type="button" className="btn btn-secondary">Cancel</Link>
+                <button type="button" className="btn btn-secondary" onClick={()=>history.push("/")}>Cancel</button>
             </form>
         </div>
     );

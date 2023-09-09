@@ -19,7 +19,6 @@ function hasTableName(req, res, next) {
   if(!data) {
     next({message: "data missing", status: 400});
   }
-  console.log("table_name",data.table_name);
   if (!data.table_name) {
     next({message: "table_name field missing", status: 400});
   }

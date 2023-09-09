@@ -20,7 +20,7 @@ router.route("/:tableId")
 
 router.route("/:tableId/seat")
     .put(controller.update)
-    .delete(controller.destroy)
+    .delete(controller.update)
     .all(methodNotAllowed);
 
 module.exports = router;

@@ -230,10 +230,24 @@ async function destroy(req, res, next) {
   res.sendStatus(204);
 }
 
+async function status(req, res, next) {
+  const givenReservationData = req.body.data;
+    const {reservationId} = req.params;
+    const reservationData = {
+      ...res.locals.foundReservation,
+      ...givenReservationData,
+      reservation_id: Number(reservationId)
+    };
+    
+    const data = await reservationsService.update(reservationId, reservationData);
+    res.status(201).json({data});
+}
+
 module.exports = {
   list,
   create: [hasFirstName, hasLastName, hasMobileNumber, hasReservationTime, hasReservationDate, hasPeople, create],
   read: [reservationExists, read],
   update: [reservationExists, hasFirstName, hasLastName, hasMobileNumber, hasReservationTime, hasReservationDate, hasPeople, update],
-  destroy: [reservationExists, destroy]
+  destroy: [reservationExists, destroy],
+  status
 };
