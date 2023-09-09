@@ -36,7 +36,7 @@ function Dashboard({ date }) {
       <div className="d-flex flex-column mb-3">
         <h4 className="mb-0">Reservations for date</h4>
         <ErrorAlert error={reservationsError} />
-        <ReservationsList reservations={reservations}/>
+        <ReservationsList reservations={reservations} setReservations={setReservations}/>
       </div>
       <div className="d-flex flex-column mb-3">
         <h4>Tables</h4>

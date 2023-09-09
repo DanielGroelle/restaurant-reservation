@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {Link, useHistory, useParams} from "react-router-dom";
+import {useHistory, useParams} from "react-router-dom";
 import {fetchJson} from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
 
@@ -37,7 +37,7 @@ function ReservationForm({edit}) {
                 });
             })();
         }
-    }, [reservation_id]);
+    }, [reservation_id, API_BASE_URL]);
 
     function handleChange(event) {
         let newFormData = {...formData};
@@ -106,7 +106,7 @@ function ReservationForm({edit}) {
                 <input name="people" type="number" placeholder="0" required onChange={handleChange} value={formData.people}/>
                 
                 <button type="submit" className="btn btn-primary">Submit</button>
-                <Link to="/dashboard" type="button" className="btn btn-secondary">Cancel</Link>
+                <button type="button" className="btn btn-secondary" onClick={()=>history.goBack()}>Cancel</button>
             </form>
         </div>
     );

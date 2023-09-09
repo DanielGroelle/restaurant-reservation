@@ -205,23 +205,22 @@ async function update(req, res, next) {
     else {
       res.status(400).json({error: res.locals.errors[0].message});
     }
+    return;
   }
-  //if we dont have errors, update the reservation and send back data
-  else {
-    //delete the 'frontend' key so it doesnt interfere with reservation creation
-    if (req.body.data.frontend) delete req.body.data.frontend;
-    
-    const givenReservationData = req.body.data;
-    const {reservationId} = req.params;
-    const reservationData = {
-      ...res.locals.foundReservation,
-      ...givenReservationData,
-      reservation_id: Number(reservationId)
-    };
-    
-    const data = await reservationsService.update(reservationId, reservationData);
-    res.status(201).json({data});
-  }
+
+  //delete the 'frontend' key so it doesnt interfere with reservation creation
+  if (req.body.data.frontend) delete req.body.data.frontend;
+  
+  const givenReservationData = req.body.data;
+  const {reservationId} = req.params;
+  const reservationData = {
+    ...res.locals.foundReservation,
+    ...givenReservationData,
+    reservation_id: Number(reservationId)
+  };
+  
+  const data = await reservationsService.update(reservationId, reservationData);
+  res.status(201).json({data});
 }
 
 async function destroy(req, res, next) {

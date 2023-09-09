@@ -58,7 +58,7 @@ function TableForm() {
                 <input name="capacity" type="number" placeholder="0" required onChange={handleChange}/>
                 
                 <button type="submit" className="btn btn-primary">Submit</button>
-                <button type="button" className="btn btn-secondary" onClick={()=>history.push("/")}>Cancel</button>
+                <button type="button" className="btn btn-secondary" onClick={()=>history.goBack()}>Cancel</button>
             </form>
         </div>
     );

@@ -1,10 +1,9 @@
-import React, {useState} from "react";
+import React from "react";
 import {fetchJson} from "../utils/api";
 
-function Reservation({reservation}) {
+function Reservation({reservation, setReservations}) {
     //implement cancel confirmation
     const {reservation_id} = reservation;
-    const [update, setUpdate] = useState(false);
     
     async function onCancel() {
         const API_BASE_URL =
@@ -19,7 +18,10 @@ function Reservation({reservation}) {
                 },
                 body: JSON.stringify({"data": {...reservation, status: "cancelled"}})
             });
-            setUpdate(true);
+            const newReservations = await fetchJson(`${API_BASE_URL}/reservations`, {
+                method: "GET"
+            });
+            setReservations(newReservations);
         }
     }
 
