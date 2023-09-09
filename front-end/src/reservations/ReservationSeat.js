@@ -20,8 +20,6 @@ function ReservationSeat() {
     const [tables, setTables] = useState([{table_name:"", table_id:99, capacity:0}]);
 
     useEffect(()=>{
-        //maybe start using these idk
-        const abortController = new AbortController();
         (async ()=>{
             try {
                 const data = await listTables();

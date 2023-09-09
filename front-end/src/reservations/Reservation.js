@@ -29,6 +29,7 @@ function Reservation({reservation, setReservations}) {
         <div className="card">
             <div className="card-body d-flex flex-column">
                 First Name: {reservation.first_name}<br/>
+                Last Name: {reservation.last_name}<br/>
                 Mobile Number: {reservation.mobile_number}<br/>
                 Time: {reservation.reservation_time}<br/>
                 People: {reservation.people}<br/>

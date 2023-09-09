@@ -49,10 +49,11 @@ function ReservationForm({edit}) {
         event.preventDefault();
         
         const method = edit ? "PUT" : "POST"
+        const url = edit ? `${API_BASE_URL}/reservations/${reservation_id}` : `${API_BASE_URL}/reservations`
 
         //update the database with the reservation data
         try {
-            await fetchJson(`${API_BASE_URL}/reservations`, {
+            await fetchJson(url, {
                 method,
                 headers: {
                     "Content-Type": "application/json",
