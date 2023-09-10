@@ -1,11 +1,11 @@
 import React from "react";
 import Table from "./Table";
 
-function TablesList({tables, setTables}) {
+function TablesList({tables, setTables, setReservations, date}) {
     //order alphabetically
     return (
         <div>
-            {tables.map((table)=><Table table={table} setTables={setTables} key={table.table_id}/>)}
+            {tables.map((table)=><Table table={table} setTables={setTables} setReservations={setReservations} date={date} key={table.table_id}/>)}
         </div>
     );
 }

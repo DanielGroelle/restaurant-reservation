@@ -1,7 +1,7 @@
 import React from "react";
 import {fetchJson} from "../utils/api";
 
-function Table({table, setTables}) {
+function Table({table, setTables, setReservations, date}) {
     async function onFinish(table_id) {
         const API_BASE_URL =
             process.env.REACT_APP_API_BASE_URL || "http://localhost:5001";
@@ -26,6 +26,10 @@ function Table({table, setTables}) {
                 method: "GET"
             });
             setTables(newTables);
+            const newReservations = await fetchJson(`${API_BASE_URL}/reservations?date=${date}`, {
+                method: "GET"
+            });
+            setReservations(newReservations);
         }
     }
 

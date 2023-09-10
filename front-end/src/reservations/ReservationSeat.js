@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {useParams, Link, useHistory} from "react-router-dom";
+import {useParams, useHistory} from "react-router-dom";
 import {fetchJson, listTables} from "../utils/api";
 import TableSelect from "../tables/TableSelect";
 import ErrorAlert from "../layout/ErrorAlert";
@@ -50,7 +50,11 @@ function ReservationSeat() {
                 body: JSON.stringify({"data": {reservation_id}})
             });
             setError();
-            history.push("/dashboard");
+            const reservation = await fetchJson(`${API_BASE_URL}/reservations/${reservation_id}`, {
+                method: "GET"
+            });
+            const date = reservation.reservation_date;
+            history.push(`/dashboard?date=${date.slice(0, date.indexOf("T"))}`);
         }
         catch(error) {
             setError(error);
@@ -65,7 +69,7 @@ function ReservationSeat() {
                     {tables.map((table)=><TableSelect table={table} key={table.table_id}/>)}
                 </select>
                 <button type="submit" className="btn btn-secondary">Submit</button>
-                <Link to="/dashboard" className="btn btn-secondary">Cancel</Link>
+                <button type="button" className="btn btn-secondary" onClick={(()=>history.goBack())}>Cancel</button>
             </form>
         </div>
     );
