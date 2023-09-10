@@ -1,16 +1,11 @@
 import React, { useEffect, useState } from "react";
-import {useLocation, useHistory} from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { listReservations, listTables } from "../utils/api";
 import { today } from "../utils/date-time";
+import useQuery from "../utils/useQuery";
 import ErrorAlert from "../layout/ErrorAlert";
 import ReservationsList from "../reservations/ReservationsList";
 import TablesList from "../tables/TablesList";
-
-function useQuery() {
-  const { search } = useLocation();
-
-  return React.useMemo(() => new URLSearchParams(search), [search]);
-}
 
 /**
  * Defines the dashboard page.
