@@ -71,18 +71,7 @@ function hasReservationDate(req, res, next) {
   const hour = res.locals.hour;
   const minute = res.locals.minute;
 
-  if(!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-    if (dateArray[0].length !== 4) {
-      res.locals.errors.push({message:"reservation_date must have a valid year", status: 400});
-    }
-    if (dateArray[1].length !== 2 || month < 0 || month > 11) {
-      res.locals.errors.push({message:"reservation_date must have a valid month", status: 400});
-    }
-    if (dateArray[2].length !== 2 || day <= 0 || day > 31) {
-      res.locals.errors.push({message:"reservation_date must have a valid day", status: 400});
-    }
-  }
-  else {
+  if(!isValidDate(data.reservation_date)) {
     res.locals.errors.push({message: "reservation_date must be valid", status: 400});
   }
 
@@ -153,14 +142,49 @@ function hasPeople(req, res, next) {
   next();
 }
 
+function isValidDate(date) {
+  let dateArray = date?.split("-") ?? ["", "", ""];
+  const year = Number(dateArray[0]);
+  const month = Number(dateArray[1]) - 1; // minus one because date object starts month at 0
+  const day = Number(dateArray[2]);
+
+  if(!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+    if (dateArray[0].length !== 4) {
+      return false;
+    }
+    if (dateArray[1].length !== 2 || month < 0 || month > 11) {
+      return false;
+    }
+    if (dateArray[2].length !== 2 || day <= 0 || day > 31) {
+      return false;
+    }
+  }
+  else {
+    return false;
+  }
+
+  return true;
+}
+
 /**
  * List handler for reservation resources
  */
 async function list(req, res, next) {
   //need to check if there are queries ?mobile_number=XXX-XXX-XXXX
   //needs to sort reservations by time (oldest first)
+  let reservations = await reservationsService.list();
+  const date = req.query.date;
+  
+  if (isValidDate(date)) {
+    reservations = reservations.filter((reservation)=>{
+      let reservationDate = reservation.reservation_date.toJSON();
+      reservationDate = reservationDate.slice(0, reservationDate.indexOf("T"))
+      return reservationDate === date;
+    });
+  }
+  
   res.status(200).json({
-    data: await reservationsService.list(),
+    data: reservations
   });
 }
 

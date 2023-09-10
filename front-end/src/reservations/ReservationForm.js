@@ -62,7 +62,7 @@ function ReservationForm({edit}) {
                 //frontend set to true so we get all errors from the api
             });
             setError();
-            history.push("/dashboard");
+            history.push(`/dashboard?date=${formData.reservation_date}`);
         }
         catch(error) {
             setError(error);
