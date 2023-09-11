@@ -15,13 +15,6 @@ function Table({table, setTables, setReservations, date}) {
                 },
                 body: JSON.stringify({"data": {reservation_id: null}})
             });
-            await fetchJson(`${API_BASE_URL}/reservations/${table.reservation_id}/status`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({"data": {status: "finished"}})
-            });
             
             const newTables = await fetchJson(`${API_BASE_URL}/tables`, {
                 method: "GET"

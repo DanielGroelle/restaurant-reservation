@@ -244,6 +244,14 @@ async function list(req, res, next) {
 }
 
 async function create(req, res, next) {
+  const givenReservationData = req.body.data;
+  const status = givenReservationData.status;
+
+  if (status === "finished" || status === "seated") {
+    next({message: `status cannot be '${status}' for a new reservation`, status: 400});
+    return;
+  }
+
   //if we have errors
   if (res.locals.errors.length > 0) {
     //if the request came from the frontend
@@ -262,7 +270,6 @@ async function create(req, res, next) {
   //delete the 'frontend' key so it doesnt interfere with reservation creation
   delete req.body.data.frontend;
   
-  const givenReservationData = req.body.data;
   const data = await reservationsService.create(givenReservationData);
   res.status(201).json({data});
 }
@@ -298,8 +305,11 @@ async function update(req, res, next) {
     reservation_id: Number(reservationId)
   };
   
-  const data = await reservationsService.update(reservationId, reservationData);
-  res.status(201).json({data});
+  let  data = await reservationsService.update(reservationId, reservationData);
+  let mobileNumberArray = data.mobile_number.split("-");
+  data.mobile_number = `${mobileNumberArray[0]}${mobileNumberArray[1]}${mobileNumberArray[2]}`
+
+  res.status(200).json({data});
 }
 
 async function destroy(req, res, next) {
@@ -318,12 +328,10 @@ async function status(req, res, next) {
     };
     
     const status = givenReservationData.status;
-
     if (status === undefined) {
       next({message: "status missing", status: 400})
       return;
     }
-
     if (!(status === "booked" || status === "seated" || status === "finished" || status === "cancelled")) {
       next({message: "unknown status", status: 400})
       return;
