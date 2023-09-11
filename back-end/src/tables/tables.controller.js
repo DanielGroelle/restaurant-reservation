@@ -58,8 +58,12 @@ async function list(req, res, next) {
 async function create(req, res, next) {
   let givenTableData = req.body.data;
 
-  //incase reservation_id was included in tableData;
-  delete givenTableData.reservation_id;
+  if (givenTableData.reservation_id) {
+    const reservation = await reservationsService.read(givenTableData.reservation_id);
+    if (!reservation) {
+      next({message: "reservation_id not valid", status: 400});
+    }
+  }
   
   const data = await tablesService.create(givenTableData);
   res.status(201).json({data});
