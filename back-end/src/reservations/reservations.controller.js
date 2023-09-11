@@ -1,5 +1,11 @@
 const reservationsService = require("./reservations.service");
 
+/**
+ * Middleware to check the :reservation_id parameter is valid,
+ * and assigns found reservation to res.locals for later use
+ * 
+ * @param {string} reservation_id 
+ */
 async function reservationExists(req, res, next) {
   const {reservationId} = req.params;
   
@@ -17,6 +23,11 @@ async function reservationExists(req, res, next) {
   }
 }
 
+/**
+ * Validates first_name key
+ * 
+ * Also initializes res.locals.errors to submit multiple errors to the frontend
+ */
 function hasFirstName(req, res, next) {
   //errors array that will be appended to
   res.locals.errors = [];
@@ -33,6 +44,9 @@ function hasFirstName(req, res, next) {
   next();
 }
 
+/**
+ * Validates last_name key
+ */
 function hasLastName(req, res, next) {
   const data = req.body.data;
   if (!data.last_name) {
@@ -41,6 +55,11 @@ function hasLastName(req, res, next) {
   next();
 }
 
+/**
+ * Validates mobile_number key 
+ * 
+ * Accepts both the form of 123-456-7890 and 1234567890
+ */
 function hasMobileNumber(req, res, next) {
   const data = req.body.data;
   if (!data.mobile_number) {
@@ -64,40 +83,11 @@ function hasMobileNumber(req, res, next) {
   next();
 }
 
-function hasReservationDate(req, res, next) {
-  const data = req.body.data;
-  if (!data.reservation_date || data.reservation_date === "") {
-    res.locals.errors.push({message: "reservation_date field missing", status: 400});
-  }
-  
-  let dateArray = data.reservation_date?.split("-") ?? ["", "", ""];
-  const year = Number(dateArray[0]);
-  const month = Number(dateArray[1]) - 1; // minus one because date object starts month at 0
-  const day = Number(dateArray[2]);
-  const hour = res.locals.hour;
-  const minute = res.locals.minute;
-
-  if(!isValidDate(data.reservation_date)) {
-    res.locals.errors.push({message: "reservation_date must be valid", status: 400});
-  }
-
-  const date = new Date(year, month, day, hour, minute);
-  const dayOfWeek = date.getDay();
-  const today = new Date();
-  
-  //if day of week is tuesday
-  if (dayOfWeek === 2) {
-    res.locals.errors.push({message:"reservation cannot be on a tuesday - closed", status: 400});
-  }
-  
-  //if the date given is before today, only if we're not updating
-  if(date < today && !res.locals.foundReservation) {
-    res.locals.errors.push({message: "reservation must be in the future", status: 400});
-  }
-
-  next();
-}
-
+/**
+ * Validates reservation_time key
+ * 
+ * Accepts only the form of HH:MM with optional :SS
+ */
 function hasReservationTime(req, res, next) {
   const data = req.body.data;
   if (!data.reservation_time) {
@@ -134,6 +124,49 @@ function hasReservationTime(req, res, next) {
   next();
 }
 
+/**
+ * Validates reservation_date key
+ * 
+ * Accepts only the form of YYYY-MM-DD
+*/
+function hasReservationDate(req, res, next) {
+  const data = req.body.data;
+  if (!data.reservation_date || data.reservation_date === "") {
+    res.locals.errors.push({message: "reservation_date field missing", status: 400});
+  }
+  
+  let dateArray = data.reservation_date?.split("-") ?? ["", "", ""];
+  const year = Number(dateArray[0]);
+  const month = Number(dateArray[1]) - 1; // minus one because date object starts month at 0
+  const day = Number(dateArray[2]);
+  //from hasReservationTime middleware
+  const hour = res.locals.hour;
+  const minute = res.locals.minute;
+
+  if(!isValidDate(data.reservation_date)) {
+    res.locals.errors.push({message: "reservation_date must be valid", status: 400});
+  }
+
+  const date = new Date(year, month, day, hour, minute);
+  const dayOfWeek = date.getDay();
+  const today = new Date();
+  
+  //if day of week is tuesday
+  if (dayOfWeek === 2) {
+    res.locals.errors.push({message:"reservation cannot be on a tuesday - closed", status: 400});
+  }
+  
+  //if the date given is before today, only if we're not updating
+  if(date < today && !res.locals.foundReservation) {
+    res.locals.errors.push({message: "reservation must be in the future", status: 400});
+  }
+
+  next();
+}
+
+/**
+ * Validates people key
+ */
 function hasPeople(req, res, next) {
   const data = req.body.data;
   if (!data.people) {
@@ -148,6 +181,13 @@ function hasPeople(req, res, next) {
   next();
 }
 
+/**
+ * Date validation helper function
+ * 
+ * Valid dates in the form of YYYY-MM-DD
+ * @param {string} date 
+ * @returns true or false
+ */
 function isValidDate(date) {
   let dateArray = date?.split("-") ?? ["", "", ""];
   const year = Number(dateArray[0]);
@@ -172,12 +212,20 @@ function isValidDate(date) {
   return true;
 }
 
+/**
+ * Mobile number validation helper function
+ * 
+ * Valid in the forms of 123-456-7890 or 1234567890
+ * @param {string} mobile_number 
+ * @returns true or false
+ */
 function isValidMobileNumber(mobile_number) {
   let mobileArray = mobile_number?.split("-") ?? ["", "", ""];
   let mobileNumberOne;
   let mobileNumberTwo;
   let mobileNumberThree;
 
+  //if the mobile_number has dashes
   if (mobileArray[1]?.length > 0) {
     mobileNumberOne = mobileArray[0];
     mobileNumberTwo = mobileArray[1];
@@ -187,12 +235,14 @@ function isValidMobileNumber(mobile_number) {
       return false;
     }
   }
+  //checking if the mobile_number has no dashes
   else if (mobile_number?.length === 10) {
     mobileNumberOne = mobile_number.slice(0, 3);
     mobileNumberTwo = mobile_number.slice(3, 6);
     mobileNumberThree = mobile_number.slice(6, 10);
   }
 
+  //making sure each number is valid
   if (isNaN(Number(mobileNumberOne)) || isNaN(Number(mobileNumberTwo)) || isNaN(Number(mobileNumberThree))) {
     return false;
   }
@@ -202,6 +252,8 @@ function isValidMobileNumber(mobile_number) {
 
 /**
  * List handler for reservation resources
+ * 
+ * Handles ?date= and ?mobile_number= queries
  */
 async function list(req, res, next) {
   let reservations = await reservationsService.list();
@@ -243,6 +295,10 @@ async function list(req, res, next) {
   });
 }
 
+/**
+ * Create handler for reservations
+ * @param {object} reservationData
+ */
 async function create(req, res, next) {
   const givenReservationData = req.body.data;
   const status = givenReservationData.status;
@@ -274,11 +330,20 @@ async function create(req, res, next) {
   res.status(201).json({data});
 }
 
+/**
+ * Read handler for reservations
+ * 
+ * Sends back a single reservation based on the :reservation_id parameter in the url
+ */
 async function read(req, res, next) {
   const data = res.locals.foundReservation;
   res.status(200).json({data});
 }
 
+/**
+ * Update handler for reservations
+ * @param {object} reservationData
+ */
 async function update(req, res, next) {
   //if we have errors
   if (res.locals.errors.length > 0) {
@@ -305,19 +370,32 @@ async function update(req, res, next) {
     reservation_id: Number(reservationId)
   };
   
+  //updating the reservation
   let  data = await reservationsService.update(reservationId, reservationData);
+
+  //changing mobile_number to the form 1234567890
   let mobileNumberArray = data.mobile_number.split("-");
   data.mobile_number = `${mobileNumberArray[0]}${mobileNumberArray[1]}${mobileNumberArray[2]}`
 
   res.status(200).json({data});
 }
 
+/**
+ * Destroy handler for reservations
+ * 
+ * Deletes a single reservation based on the :reservation_id parameter in the url
+ */
 async function destroy(req, res, next) {
   const {reservationId} = req.params;
   await reservationsService.destroy(reservationId);
   res.sendStatus(204);
 }
 
+/**
+ * Status handler for reservations
+ * 
+ * Reassigns and validates status for reservations
+ */
 async function status(req, res, next) {
   const givenReservationData = req.body.data;
     const {reservationId} = req.params;
@@ -332,6 +410,7 @@ async function status(req, res, next) {
       next({message: "status missing", status: 400})
       return;
     }
+    //if the new status doesnt match any of these options send an error
     if (!(status === "booked" || status === "seated" || status === "finished" || status === "cancelled")) {
       next({message: "unknown status", status: 400})
       return;

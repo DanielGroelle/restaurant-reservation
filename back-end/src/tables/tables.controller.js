@@ -1,6 +1,12 @@
 const tablesService = require("./tables.service");
 const reservationsService = require("../reservations/reservations.service");
 
+/**
+ * Middleware to check the :table_id parameter is valid,
+ * and assigns found reservation to res.locals for later use
+ * 
+ * @param {string} table_id
+ */
 async function tableExists(req, res, next) {
   const {tableId} = req.params;
   res.locals.foundTable = await tablesService.read(tableId);
@@ -13,6 +19,9 @@ async function tableExists(req, res, next) {
   }
 }
 
+/**
+ * Validates table_name key
+ */
 function hasTableName(req, res, next) {
   const data = req.body.data;
 
@@ -28,6 +37,9 @@ function hasTableName(req, res, next) {
   next();
 }
 
+/**
+ * Validates capacity key
+ */
 function hasCapacity(req, res, next) {
   const data = req.body.data;
   if (!data.capacity) {
@@ -55,6 +67,10 @@ async function list(req, res, next) {
   });
 }
 
+/**
+ * Create handler for tables
+ * @param {object} tableData
+ */
 async function create(req, res, next) {
   let givenTableData = req.body.data;
 
@@ -69,11 +85,19 @@ async function create(req, res, next) {
   res.status(201).json({data});
 }
 
+/**
+ * Read handler for tables
+ * 
+ * Sends back a single table based on the :table_id parameter in the url
+ */
 async function read(req, res, next) {
   const data = res.locals.foundTable;
   res.status(200).json({data});
 }
 
+/**
+ * Checks reservation_id exists in given data
+ */
 async function hasReservationId(req, res, next) {
   const givenTableData = req.body.data;
   if (givenTableData?.reservation_id === undefined) {
@@ -82,6 +106,12 @@ async function hasReservationId(req, res, next) {
   next();
 }
 
+/**
+ * Update handler for tables
+ * @param {object} tableData
+ * 
+ * Also handles reservation assignment for tables
+ */
 async function update(req, res, next) {
   const givenTableData = req.body.data;
   const {tableId} = req.params;
@@ -104,6 +134,7 @@ async function update(req, res, next) {
     return;
   }
 
+  //======updating reservation assignment for tables=======
   //if table is already assigned to a reservation
   if (res.locals.foundTable.reservation_id) {
     next({message: "table is occupied", status: 400});
@@ -122,6 +153,7 @@ async function update(req, res, next) {
     if (reservation.people > res.locals.foundTable.capacity) {
       next({message: "table does not have sufficient capacity for reservation", status: 400});
     }
+    //all validation passed, we can update the tableData with the new reservation_id
     else {
       await reservationsService.update(givenTableData.reservation_id, {
         status: "seated"
@@ -136,12 +168,18 @@ async function update(req, res, next) {
   }
 }
 
+/**
+ * Destroy handler for tables
+ */
 async function destroy(req, res, next) {
   const {tableId} = req.params;
   await tablesService.destroy(tableId);
   res.sendStatus(204);
 }
 
+/**
+ * DeleteSeat handler for tables
+ */
 async function deleteSeat(req, res, next) {
   const {tableId} = req.params;
   const tableData = {
@@ -150,6 +188,7 @@ async function deleteSeat(req, res, next) {
     table_id: Number(tableId)
   };
 
+  //if the current reservation_id is null send back an error
   if (res.locals.foundTable.reservation_id === null) {
     next({message: "table is not occupied", status: 400});
   }
