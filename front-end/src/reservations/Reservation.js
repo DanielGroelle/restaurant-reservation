@@ -19,10 +19,9 @@ function Reservation({reservation, setReservations}) {
                 body: JSON.stringify({"data": {...reservation, status: "cancelled"}})
             });
 
-            let newReservations = await fetchJson(`${API_BASE_URL}/reservations?date=${reservation.reservation_date}`, {
+            const newReservations = await fetchJson(`${API_BASE_URL}/reservations?date=${reservation.reservation_date}`, {
                 method: "GET"
             });
-            newReservations = newReservations.filter((reservation)=>reservation.status !== "finished");
             setReservations(newReservations);
         }
     }

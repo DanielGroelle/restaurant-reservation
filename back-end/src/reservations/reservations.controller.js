@@ -189,6 +189,7 @@ async function list(req, res, next) {
       reservationDate = reservationDate.slice(0, reservationDate.indexOf("T"))
       return reservationDate === date;
     });
+    reservations = reservations.filter((reservation)=>reservation.status !== "finished");
   }
   
   //sort reservations by time
@@ -206,13 +207,8 @@ async function list(req, res, next) {
 
   //for ?mobile_number= queries
   if (mobile_number) {
-    if (isValidMobileNumber(mobile_number)) {
-      reservations = reservations.filter((reservation)=>reservation.mobile_number === mobile_number);
-      res.status(200).json({data: reservations});
-    }
-    else {
-      res.status(400).json({error: "mobile_number must be valid"});
-    }
+    reservations = reservations.filter((reservation)=>reservation.mobile_number.includes(mobile_number));
+    res.status(200).json({data: reservations});
   }
   //if no queries
   else {
@@ -234,16 +230,16 @@ async function create(req, res, next) {
     else {
       res.status(400).json({error: res.locals.errors[0].message});
     }
+    return;
   }
-  //if we dont have errors, create the reservation and send back data
-  else {
-    //delete the 'frontend' key so it doesnt interfere with reservation creation
-    if (req.body.data.frontend) delete req.body.data.frontend;
-    
-    const givenReservationData = req.body.data;
-    const data = await reservationsService.create(givenReservationData);
-    res.status(201).json({data});
-  }
+
+  //create the reservation and send back data
+  //delete the 'frontend' key so it doesnt interfere with reservation creation
+  delete req.body.data.frontend;
+  
+  const givenReservationData = req.body.data;
+  const data = await reservationsService.create(givenReservationData);
+  res.status(201).json({data});
 }
 
 async function read(req, res, next) {

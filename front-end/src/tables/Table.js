@@ -27,10 +27,9 @@ function Table({table, setTables, setReservations, date}) {
                 method: "GET"
             });
             setTables(newTables);
-            let newReservations = await fetchJson(`${API_BASE_URL}/reservations?date=${date}`, {
+            const newReservations = await fetchJson(`${API_BASE_URL}/reservations?date=${date}`, {
                 method: "GET"
             });
-            newReservations = newReservations.filter((reservation)=>reservation.status !== "finished");
             setReservations(newReservations);
         }
     }
