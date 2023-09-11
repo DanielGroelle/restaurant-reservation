@@ -31,7 +31,10 @@ function Dashboard({ date }) {
 
     setReservationsError(null);
     listReservations({ date }, abortController.signal)
-      .then(setReservations)
+      .then((listedReservations)=>{
+        const filteredReservations = listedReservations.filter((reservation)=>reservation.status !== "finished");
+        setReservations(filteredReservations);
+      })
       .catch(setReservationsError);
     listTables()
       .then(setTables)

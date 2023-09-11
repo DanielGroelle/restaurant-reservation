@@ -15,20 +15,22 @@ function Table({table, setTables, setReservations, date}) {
                 },
                 body: JSON.stringify({"data": {reservation_id: null}})
             });
-            await fetchJson(`${API_BASE_URL}/reservations/${table.reservation_id}/status`, {
+            let data = await fetchJson(`${API_BASE_URL}/reservations/${table.reservation_id}/status`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({"data": {status: "finished"}})
             });
+            console.log(data);
             const newTables = await fetchJson(`${API_BASE_URL}/tables`, {
                 method: "GET"
             });
             setTables(newTables);
-            const newReservations = await fetchJson(`${API_BASE_URL}/reservations?date=${date}`, {
+            let newReservations = await fetchJson(`${API_BASE_URL}/reservations?date=${date}`, {
                 method: "GET"
             });
+            newReservations = newReservations.filter((reservation)=>reservation.status !== "finished");
             setReservations(newReservations);
         }
     }
