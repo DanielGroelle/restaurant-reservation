@@ -178,7 +178,6 @@ function isValidMobileNumber(mobile_number) {
  * List handler for reservation resources
  */
 async function list(req, res, next) {
-  //needs to sort reservations by time (oldest first)
   let reservations = await reservationsService.list();
   const date = req.query.date;
   const mobile_number = req.query.mobile_number;

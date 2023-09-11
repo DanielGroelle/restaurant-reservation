@@ -46,13 +46,21 @@ function hasCapacity(req, res, next) {
  * List handler for tables resources
  */
 async function list(req, res, next) {
+  let tablesData = await tablesService.list();
+
+  //sort tables alphabetically
+  tablesData = tablesData.sort((a, b)=>a.table_name < b.table_name ? -1 : 1);
   res.status(200).json({
-    data: await tablesService.list(),
+    data: tablesData
   });
 }
 
 async function create(req, res, next) {
-  const givenTableData = req.body.data;
+  let givenTableData = req.body.data;
+
+  //incase reservation_id was included in tableData;
+  delete givenTableData.reservation_id;
+  
   const data = await tablesService.create(givenTableData);
   res.status(201).json({data});
 }
@@ -60,6 +68,14 @@ async function create(req, res, next) {
 async function read(req, res, next) {
   const data = res.locals.foundTable;
   res.status(200).json({data});
+}
+
+async function hasReservationId(req, res, next) {
+  const givenTableData = req.body.data;
+  if (givenTableData?.reservation_id === undefined) {
+    next({message: "reservation_id missing", status: 400});
+  }
+  next();
 }
 
 async function update(req, res, next) {
@@ -71,15 +87,49 @@ async function update(req, res, next) {
     table_id: Number(tableId)
   };
 
-  if (givenTableData.reservation_id) {
-    const reservationData = await reservationsService.read(givenTableData.reservation_id);
-    await reservationsService.update(givenTableData.reservation_id, {
-      status: "seated"
-    }); 
+  //check if there is data to update with
+  if (!givenTableData) {
+    next({message: "table data missing", status: 400});
+    return;
   }
 
-  const data = await tablesService.update(tableId, tableData);
-  res.status(201).json({data});
+  //if not assigning a table to a reservation and just updating
+  if (givenTableData.reservation_id === undefined) {
+    const data = await tablesService.update(tableId, tableData);
+    res.status(201).json({data});
+    return;
+  }
+
+  //if table is already assigned to a reservation
+  if (res.locals.foundTable.reservation_id) {
+    next({message: "table is occupied", status: 400});
+    return;
+  }
+  
+  //find the current reservation to make sure it exists
+  const reservation = await reservationsService.read(givenTableData.reservation_id);
+  if (reservation) {
+
+    if (reservation.status === "seated") {
+      next({message: "reservation is already seated", status: 400});
+      return;
+    }
+
+    if (reservation.people > res.locals.foundTable.capacity) {
+      next({message: "table does not have sufficient capacity for reservation", status: 400});
+    }
+    else {
+      await reservationsService.update(givenTableData.reservation_id, {
+        status: "seated"
+      });
+      const data = await tablesService.update(tableId, tableData);
+      res.status(200).json({data});
+    }
+  }
+  //if reservation_id doesnt exist
+  else {
+    next({message: `reservation_id does not exist: ${givenTableData.reservation_id}`, status: 404});
+  }
 }
 
 async function destroy(req, res, next) {
@@ -88,10 +138,32 @@ async function destroy(req, res, next) {
   res.sendStatus(204);
 }
 
+async function deleteSeat(req, res, next) {
+  const {tableId} = req.params;
+  const tableData = {
+    ...res.locals.foundTable,
+    reservation_id: null,
+    table_id: Number(tableId)
+  };
+
+  if (res.locals.foundTable.reservation_id === null) {
+    next({message: "table is not occupied", status: 400});
+  }
+  else {
+    await reservationsService.update(res.locals.foundTable.reservation_id, {
+      status: "finished"
+    });
+    const data = await tablesService.update(tableId, tableData);
+    res.status(200).json({data});
+  }
+}
+
 module.exports = {
   list,
   create: [hasTableName, hasCapacity, create],
   read: [tableExists, read],
   update: [tableExists, update],
-  destroy: [tableExists, destroy]
+  destroy: [tableExists, destroy],
+  updateSeat: [tableExists, hasReservationId, update],
+  deleteSeat: [tableExists, deleteSeat]
 };
