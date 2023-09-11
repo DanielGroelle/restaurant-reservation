@@ -15,14 +15,14 @@ function Table({table, setTables, setReservations, date}) {
                 },
                 body: JSON.stringify({"data": {reservation_id: null}})
             });
-            let data = await fetchJson(`${API_BASE_URL}/reservations/${table.reservation_id}/status`, {
+            await fetchJson(`${API_BASE_URL}/reservations/${table.reservation_id}/status`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({"data": {status: "finished"}})
             });
-            console.log(data);
+            
             const newTables = await fetchJson(`${API_BASE_URL}/tables`, {
                 method: "GET"
             });
@@ -41,12 +41,12 @@ function Table({table, setTables, setReservations, date}) {
                 {table.table_name}
                 <div data-table-id-status={table.table_id}>
                     {table.reservation_id ? 
-                    <>
-                        Occupied
-                        <button className="btn btn-primary" data-table-id-finish={table.table_id} onClick={()=>{onFinish(table.table_id)}}>Finish</button>
-                    </>
-                        :
-                    "Free"
+                        <>
+                            Occupied
+                            <button className="btn btn-primary" data-table-id-finish={table.table_id} onClick={()=>{onFinish(table.table_id)}}>Finish</button>
+                        </>
+                            :
+                        "Free"
                     }
                 </div>
             </div>

@@ -1,15 +1,18 @@
 import React, { useState } from "react";
+import { fetchJson } from "../utils/api";
+import ErrorAlert from "../layout/ErrorAlert";
+import ReservationsList from "../reservations/ReservationsList";
 
 function SearchForm() {
+    const API_BASE_URL =
+        process.env.REACT_APP_API_BASE_URL || "http://localhost:5001";
     const initialFormData = {
-        first_name: "",
-        mobile_number: "",
-        reservation_date: "",
-        reservation_time: "",
-        people: ""
+        mobile_number: ""
     };
 
     const [formData, setFormData] = useState({...initialFormData});
+    const [reservations, setReservations] = useState([]);
+    const [error, setError] = useState();
 
     function handleChange(event) {
         let newFormData = {...formData};
@@ -19,13 +22,17 @@ function SearchForm() {
     
     async function handleSubmit(event) {
         event.preventDefault();
-        //update the database with the new card data
 
-        //make request to api,
-        //use axios
-        //if promise resolves to an error render that error
-        //className="alert alert-danger"
-        
+        try {
+            const foundReservations = await fetchJson(`${API_BASE_URL}/reservations?mobile_number=${formData.mobile_number}`, {
+                method: "GET"
+            });
+            setReservations(foundReservations);
+            setError();
+        }
+        catch(error) {
+            setError(error);
+        }
     }
 
     return (
@@ -36,9 +43,16 @@ function SearchForm() {
                 </label>
                 <input name="mobile_number" type="text" placeholder="Enter a customer's phone number" onChange={handleChange}/>
 
-                <button type="button" className="btn btn-primary">Find</button>
-
+                <button type="submit" className="btn btn-primary">Find</button>
             </form>
+
+            <ErrorAlert error={error} />
+            <h4 className="mb-0">Found Reservations</h4>
+            {reservations.length === 0 ?
+                "No reservations found"
+                    :
+                <ReservationsList reservations={reservations} setReservations={setReservations}/>
+            }
         </div>
     );
 }

@@ -45,16 +45,11 @@ function hasMobileNumber(req, res, next) {
   const data = req.body.data;
   if (!data.mobile_number) {
     res.locals.errors.push({message: "mobile_number field missing", status: 400});
-  }
-  
-  let mobileArray = data.mobile_number?.split("-") ?? [];
-  const mobileNumberOne = mobileArray[0] ?? "";
-  const mobileNumberTwo = mobileArray[1] ?? "";
-  const mobileNumberThree = mobileArray[2] ?? "";
-
-  if (mobileNumberOne.length !== 3 || mobileNumberTwo.length !== 3 || mobileNumberThree.length !== 4) {
+  }  
+  if(!isValidMobileNumber(data.mobile_number)) {
     res.locals.errors.push({message: "mobile_number must be valid", status: 400});
   }
+
   next();
 }
 
@@ -166,15 +161,29 @@ function isValidDate(date) {
   return true;
 }
 
+function isValidMobileNumber(mobile_number) {
+  let mobileArray = mobile_number?.split("-") ?? ["", "", ""];
+  const mobileNumberOne = mobileArray[0];
+  const mobileNumberTwo = mobileArray[1];
+  const mobileNumberThree = mobileArray[2];
+
+  if (mobileNumberOne.length === 3 && mobileNumberTwo.length === 3 && mobileNumberThree.length === 4) {
+    return true;
+  }
+
+  return false;
+}
+
 /**
  * List handler for reservation resources
  */
 async function list(req, res, next) {
-  //need to check if there are queries ?mobile_number=XXX-XXX-XXXX
   //needs to sort reservations by time (oldest first)
   let reservations = await reservationsService.list();
   const date = req.query.date;
+  const mobile_number = req.query.mobile_number;
   
+  //for ?date= queries
   if (isValidDate(date)) {
     reservations = reservations.filter((reservation)=>{
       let reservationDate = reservation.reservation_date.toJSON();
@@ -183,9 +192,22 @@ async function list(req, res, next) {
     });
   }
   
-  res.status(200).json({
-    data: reservations
-  });
+  //for ?mobile_number= queries
+  if (mobile_number) {
+    if (isValidMobileNumber(mobile_number)) {
+      reservations = reservations.filter((reservation)=>reservation.mobile_number === mobile_number);
+      res.status(200).json({data: reservations});
+    }
+    else {
+      res.status(400).json({error: "mobile_number must be valid"});
+    }
+  }
+  //if no queries
+  else {
+    res.status(200).json({
+      data: reservations
+    });
+  }
 }
 
 async function create(req, res, next) {
