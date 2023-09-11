@@ -45,9 +45,20 @@ function hasMobileNumber(req, res, next) {
   const data = req.body.data;
   if (!data.mobile_number) {
     res.locals.errors.push({message: "mobile_number field missing", status: 400});
-  }  
-  if(!isValidMobileNumber(data.mobile_number)) {
+  }
+
+  const valid = isValidMobileNumber(data.mobile_number);
+
+  if(!valid) {
     res.locals.errors.push({message: "mobile_number must be valid", status: 400});
+  }
+
+  if (data.mobile_number?.length === 10 && valid) {
+    let mobileNumberOne = data.mobile_number.slice(0, 3);
+    let mobileNumberTwo = data.mobile_number.slice(3, 6);
+    let mobileNumberThree = data.mobile_number.slice(6, 10);
+
+    req.body.data.mobile_number = `${mobileNumberOne}-${mobileNumberTwo}-${mobileNumberThree}`;
   }
 
   next();
@@ -163,15 +174,30 @@ function isValidDate(date) {
 
 function isValidMobileNumber(mobile_number) {
   let mobileArray = mobile_number?.split("-") ?? ["", "", ""];
-  const mobileNumberOne = mobileArray[0];
-  const mobileNumberTwo = mobileArray[1];
-  const mobileNumberThree = mobileArray[2];
+  let mobileNumberOne;
+  let mobileNumberTwo;
+  let mobileNumberThree;
 
-  if (mobileNumberOne.length === 3 && mobileNumberTwo.length === 3 && mobileNumberThree.length === 4) {
-    return true;
+  if (mobileArray[1]?.length > 0) {
+    mobileNumberOne = mobileArray[0];
+    mobileNumberTwo = mobileArray[1];
+    mobileNumberThree = mobileArray[2];
+
+    if (mobileNumberOne.length !== 3 || mobileNumberTwo.length !== 3 || mobileNumberThree.length !== 4) {
+      return false;
+    }
+  }
+  else if (mobile_number?.length === 10) {
+    mobileNumberOne = mobile_number.slice(0, 3);
+    mobileNumberTwo = mobile_number.slice(3, 6);
+    mobileNumberThree = mobile_number.slice(6, 10);
   }
 
-  return false;
+  if (isNaN(Number(mobileNumberOne)) || isNaN(Number(mobileNumberTwo)) || isNaN(Number(mobileNumberThree))) {
+    return false;
+  }
+
+  return true;
 }
 
 /**
@@ -209,13 +235,12 @@ async function list(req, res, next) {
   if (mobile_number) {
     reservations = reservations.filter((reservation)=>reservation.mobile_number.includes(mobile_number));
     res.status(200).json({data: reservations});
+    return;
   }
-  //if no queries
-  else {
-    res.status(200).json({
-      data: reservations
-    });
-  }
+  
+  res.status(200).json({
+    data: reservations
+  });
 }
 
 async function create(req, res, next) {
@@ -263,7 +288,7 @@ async function update(req, res, next) {
   }
 
   //delete the 'frontend' key so it doesnt interfere with reservation creation
-  if (req.body.data.frontend) delete req.body.data.frontend;
+  delete req.body.data.frontend;
   
   const givenReservationData = req.body.data;
   const {reservationId} = req.params;
@@ -292,8 +317,25 @@ async function status(req, res, next) {
       reservation_id: Number(reservationId)
     };
     
+    const status = givenReservationData.status;
+
+    if (status === undefined) {
+      next({message: "status missing", status: 400})
+      return;
+    }
+
+    if (!(status === "booked" || status === "seated" || status === "finished" || status === "cancelled")) {
+      next({message: "unknown status", status: 400})
+      return;
+    }
+
+    if (res.locals.foundReservation.status === "finished") {
+      next({message: "finished reservations cannot be updated", status: 400});
+      return;
+    }
+
     const data = await reservationsService.update(reservationId, reservationData);
-    res.status(201).json({data});
+    res.status(200).json({data});
 }
 
 module.exports = {
@@ -302,5 +344,5 @@ module.exports = {
   read: [reservationExists, read],
   update: [reservationExists, hasFirstName, hasLastName, hasMobileNumber, hasReservationTime, hasReservationDate, hasPeople, update],
   destroy: [reservationExists, destroy],
-  status
+  status: [reservationExists, status]
 };
