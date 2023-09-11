@@ -192,6 +192,19 @@ async function list(req, res, next) {
     });
   }
   
+  //sort reservations by time
+  reservations.sort((a, b)=>{
+    aHour = a.reservation_time.slice(0,2);
+    aMin = a.reservation_time.slice(3,5);
+    bHour = b.reservation_time.slice(0,2);
+    bMin = b.reservation_time.slice(3,5);
+    
+    if (aHour - bHour !== 0) {
+      return aHour - bHour;
+    }
+    return aMin - bMin;
+  });
+
   //for ?mobile_number= queries
   if (mobile_number) {
     if (isValidMobileNumber(mobile_number)) {
