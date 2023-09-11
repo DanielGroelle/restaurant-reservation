@@ -4,7 +4,7 @@ import {fetchJson} from "../utils/api";
 function Reservation({reservation, setReservations}) {
     //implement cancel confirmation
     const {reservation_id} = reservation;
-    
+
     async function onCancel() {
         const API_BASE_URL =
             process.env.REACT_APP_API_BASE_URL || "http://localhost:5001";
@@ -18,9 +18,11 @@ function Reservation({reservation, setReservations}) {
                 },
                 body: JSON.stringify({"data": {...reservation, status: "cancelled"}})
             });
-            const newReservations = await fetchJson(`${API_BASE_URL}/reservations`, {
+
+            let newReservations = await fetchJson(`${API_BASE_URL}/reservations?date=${reservation.reservation_date}`, {
                 method: "GET"
             });
+            newReservations = newReservations.filter((reservation)=>reservation.status !== "finished");
             setReservations(newReservations);
         }
     }
