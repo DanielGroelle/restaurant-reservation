@@ -21,20 +21,18 @@ function Dashboard({ date }) {
 
   let history = useHistory();
   const query = useQuery();
+  //defaults to current date, otherwise set date to the value of query ?date=
   date = query.get("date") ?? date;
 
-
   useEffect(loadDashboard, [date]);
-
+  //loads the reservation data as well as tables data,
+  //and appropriately sets errors if there are any
   function loadDashboard() {
     const abortController = new AbortController();
 
     setReservationsError(null);
     listReservations({ date }, abortController.signal)
-      .then((listedReservations)=>{
-        const filteredReservations = listedReservations.filter((reservation)=>reservation.status !== "finished");
-        setReservations(filteredReservations);
-      })
+      .then(setReservations)
       .catch(setReservationsError);
     listTables()
       .then(setTables)
@@ -42,6 +40,7 @@ function Dashboard({ date }) {
     return () => abortController.abort();
   }
 
+  //add or subtract from the current date based on value parameter
   function changeDate(value) {
     if (value === 0) {
       date = today();
@@ -52,6 +51,8 @@ function Dashboard({ date }) {
     const month = Number(dateArray[1]) - 1;
     const day = Number(dateArray[2]) + 1;
     
+    //use getDate method to have a value we can add to the date with
+    //setDate method updates the date with this new value
     let newDate = new Date(year, month, day);
     newDate.setDate(newDate.getDate() - 1 + value);
 
@@ -65,17 +66,27 @@ function Dashboard({ date }) {
       <h1>Dashboard</h1>
       <div className="d-flex flex-column mb-3">
         <h4 className="mb-0">Reservations for date</h4>
+        {/*Displays reservation errors from fetching*/}
         <ErrorAlert error={reservationsError} />
-        <div className="btn-group" role="group" aria-label="Basic example">
+        
+        {/*Button group to navigate between dates*/}
+        <div className="btn-group" role="group" aria-label="Change date">
           <button type="button" className="btn btn-primary" onClick={(()=>changeDate(-1))}>Previous</button>
           <button type="button" className="btn btn-primary" onClick={(()=>changeDate(0))}>Today</button>
           <button type="button" className="btn btn-primary" onClick={(()=>changeDate(1))}>Next</button>
         </div>
+
+        {/*Lists reservations that were fetched
+        Passes in setReservations to allow for updating of the array*/}
         <ReservationsList reservations={reservations} setReservations={setReservations}/>
       </div>
       <div className="d-flex flex-column mb-3">
         <h4>Tables</h4>
+        {/*Displays table errors from fetching*/}
         <ErrorAlert error={tablesError}/>
+
+        {/*Lists tables that were fetched
+        Passes in setTables and setReservations to allow for updating of the arrays*/}
         <TablesList tables={tables} setTables={setTables} setReservations={setReservations} date={date}/>
       </div>
     </main>

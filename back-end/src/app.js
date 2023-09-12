@@ -15,6 +15,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+//primary backend routes
 app.use("/reservations", reservationsRouter);
 app.use("/tables", tablesRouter);
 

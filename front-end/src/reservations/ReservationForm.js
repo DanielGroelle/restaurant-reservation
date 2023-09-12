@@ -3,6 +3,11 @@ import {useHistory, useParams} from "react-router-dom";
 import {fetchJson} from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
 
+/**
+ * Reservation form component
+ * @param {boolean} edit
+ * @returns {JSX.Element}
+ */
 function ReservationForm({edit}) {
     const API_BASE_URL =
         process.env.REACT_APP_API_BASE_URL || "http://localhost:5001";
@@ -21,6 +26,7 @@ function ReservationForm({edit}) {
     const [formData, setFormData] = useState({...initialFormData});
     const [error, setError] = useState();
 
+    //loads reservation data into form if we're editing
     useEffect(()=>{
         if(reservation_id){
             (async ()=> {
@@ -31,7 +37,7 @@ function ReservationForm({edit}) {
                     first_name: data.first_name,
                     last_name: data.last_name,
                     mobile_number: data.mobile_number,
-                    reservation_date: data.reservation_date.slice(0, 10),
+                    reservation_date: data.reservation_date.slice(0, data.reservation_date.indexOf("T")),
                     reservation_time: data.reservation_time.slice(0, 5),
                     people: Number(data.people)
                 });
@@ -39,15 +45,18 @@ function ReservationForm({edit}) {
         }
     }, [reservation_id, API_BASE_URL]);
 
+    //updates form data for each change event
     function handleChange(event) {
         let newFormData = {...formData};
         newFormData[event.target.name] = event.target.value;
         setFormData(newFormData);
     }
     
+    //handles submitting of the form
     async function handleSubmit(event) {
         event.preventDefault();
         
+        //assign method and url based on if we're editing or not
         const method = edit ? "PUT" : "POST"
         const url = edit ? `${API_BASE_URL}/reservations/${reservation_id}` : `${API_BASE_URL}/reservations`
 
@@ -62,6 +71,7 @@ function ReservationForm({edit}) {
                 //frontend set to true so we get all errors from the api
             });
             setError();
+            //redirect to the date of the reservation set
             history.push(`/dashboard?date=${formData.reservation_date}`);
         }
         catch(error) {
@@ -73,6 +83,7 @@ function ReservationForm({edit}) {
         <div>
             <h1>{edit ? "Edit" : "Book"} a Reservation</h1>
             
+            {/*displays errors returned from backend*/}
             <ErrorAlert error={error}/>
 
             <form className="d-flex flex-column" onSubmit={handleSubmit}>

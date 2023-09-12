@@ -186,7 +186,7 @@ function hasPeople(req, res, next) {
  * 
  * Valid dates in the form of YYYY-MM-DD
  * @param {string} date 
- * @returns true or false
+ * @returns boolean
  */
 function isValidDate(date) {
   let dateArray = date?.split("-") ?? ["", "", ""];
@@ -217,7 +217,7 @@ function isValidDate(date) {
  * 
  * Valid in the forms of 123-456-7890 or 1234567890
  * @param {string} mobile_number 
- * @returns true or false
+ * @returns boolean
  */
 function isValidMobileNumber(mobile_number) {
   let mobileArray = mobile_number?.split("-") ?? ["", "", ""];
