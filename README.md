@@ -13,8 +13,6 @@ The table below describes the folders in this repository:
 
 The `./back-end` folder contains all the code for the backend project.
 
-The table below describes the existing files in the `./back-end` folder:
-
 | Folder/file path                                         | Description                                                                                                         |
 | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | `./back-end/knexfile.js`                                 | The Knex configuration file. You will not need to make changes to this file.                                        |
@@ -33,8 +31,6 @@ The table below describes the existing files in the `./back-end` folder:
 ### Frontend files
 
 The `./front-end` folder contains all the code for the frontend project.
-
-The table below describes the existing files in the `./front-end` folder:
 
 | Folder/file path                                   | Description                                                                                            |
 | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
@@ -65,35 +61,3 @@ The table below describes the existing files in the `./front-end` folder:
 1. You should not need to make changes to the `./front-end/.env` file unless you want to connect to a backend at a location other than `http://localhost:5001`.
 1. Run `npm install` to install project dependencies.
 1. Run `npm run start:dev` to start your server in development mode.
-
-
-
-> **Hint** In the backend code, be sure to wrap any async controller functions in an `asyncErrorBoundary` call to ensure errors in async code are property handled.
-
-In `back-end/src/errors/asyncErrorBoundary.js`
-
-```javascript
-function asyncErrorBoundary(delegate, defaultStatus) {
-  return (request, response, next) => {
-    Promise.resolve()
-      .then(() => delegate(request, response, next))
-      .catch((error = {}) => {
-        const { status = defaultStatus, message = error } = error;
-        next({
-          status,
-          message,
-        });
-      });
-  };
-}
-
-module.exports = asyncErrorBoundary;
-```
-
-Use in controllers as part of `module.exports`. For example:
-
-```javascript
-module.exports = {
-	create: asyncErrorBoundary(create)
-}
-```
