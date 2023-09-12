@@ -6,28 +6,36 @@ This project is a reservation management system for a fictional company Periodic
 
 The dashboard will display all reservations for the current selected date. Staff can change the viewing date with the Previous, Next, and Today buttons.
 New reservations will automatically be set to a status of booked.
+
 ![dashboard with a booked reservation](./images/dashboard-booked-reservation.png "Dashboard")
 
 Booked reservations can also be cancelled by pressing the Cancel button beneath them.
-![dashboard with a cancelled reservation](./images/dashboard-reservation-cancel.png "Dashboard")
+
+![dashboard with a cancelled reservation](./images/dashboard-reservation-cancelled.png "Dashboard")
 
 Pressing the Seat button on a booked reservation will bring the user to the reservation seat page.
+
 ![reservation seat page](./images/reservation-seat-page.png "Reservation seat page")
 
 When creating a new reservation, the backend will perform validation on each key in the form data automatically and display an error if there are any. 
+
 ![empty reservation form](./images/reservation-form.png "Reservation create page")
 ![reservation form with filled in data](./images/reservation-edit.png "Reservation edit page")
 
 Validation also occurs when creating a new table.
+
 ![table form page](./images/table-form.png "Table form")
 
 When a table is no longer in use, the Finish button can be clicked to remove its association with a reservation, and the reservation will automatically be marked finished and hidden from the dashboard.
+
 ![finish button next to table](./images/dashboard-seated-reservation.png "Dashboard with finish button")
 
 When searching for a reservation, the user can enter part of a mobile number and still receive results.
+
 ![search page with results](./images/search-page-results.png "Search page")
 
 If no reservations are found, the page will display 'No reservations found'.
+
 ![search page with no results](./images/search-page.png "Search page")
 
 ## Technologies
