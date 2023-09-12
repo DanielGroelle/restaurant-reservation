@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { listReservations, listTables } from "../utils/api";
-import { today } from "../utils/date-time";
+import { today, previous, next } from "../utils/date-time";
 import useQuery from "../utils/useQuery";
 import ErrorAlert from "../layout/ErrorAlert";
 import ReservationsList from "../reservations/ReservationsList";
@@ -40,27 +40,6 @@ function Dashboard({ date }) {
     return () => abortController.abort();
   }
 
-  //add or subtract from the current date based on value parameter
-  function changeDate(value) {
-    if (value === 0) {
-      date = today();
-    }
-
-    const dateArray = date.split("-");
-    const year = Number(dateArray[0]);
-    const month = Number(dateArray[1]) - 1;
-    const day = Number(dateArray[2]) + 1;
-    
-    //use getDate method to have a value we can add to the date with
-    //setDate method updates the date with this new value
-    let newDate = new Date(year, month, day);
-    newDate.setDate(newDate.getDate() - 1 + value);
-
-    newDate = newDate.toJSON();
-    date = newDate.slice(0, newDate.indexOf("T"));
-    history.push(`/dashboard?date=${date}`);
-  }
-
   return (
     <main>
       <h1>Dashboard</h1>
@@ -71,9 +50,9 @@ function Dashboard({ date }) {
         
         {/*Button group to navigate between dates*/}
         <div className="btn-group" role="group" aria-label="Change date">
-          <button type="button" className="btn btn-primary" onClick={(()=>changeDate(-1))}>Previous</button>
-          <button type="button" className="btn btn-primary" onClick={(()=>changeDate(0))}>Today</button>
-          <button type="button" className="btn btn-primary" onClick={(()=>changeDate(1))}>Next</button>
+          <button type="button" className="btn btn-primary" onClick={(()=>history.push(`/dashboard?date=${previous(date)}`))}>Previous</button>
+          <button type="button" className="btn btn-primary" onClick={(()=>history.push(`/dashboard?date=${today()}`))}>Today</button>
+          <button type="button" className="btn btn-primary" onClick={(()=>history.push(`/dashboard?date=${next(date)}`))}>Next</button>
         </div>
 
         {/*Lists reservations that were fetched
