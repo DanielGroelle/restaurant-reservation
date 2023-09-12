@@ -157,8 +157,8 @@ function hasReservationDate(req, res, next) {
     res.locals.errors.push({message:"reservation cannot be on a tuesday - closed", status: 400});
   }
   
-  //if the date given is before today
-  if(date < today) {
+  //if the date given is before today, only if we're not updating
+  if(date < today && !res.locals.foundReservation) {
     res.locals.errors.push({message: "reservation must be in the future", status: 400});
   }
 
@@ -260,12 +260,14 @@ async function list(req, res, next) {
   let reservations = await reservationsService.list();
   const date = req.query.date;
   const mobile_number = req.query.mobile_number;
-  
+
   //for ?date= queries
   if (isValidDate(date)) {
     reservations = reservations.filter((reservation)=>{
-      let reservationDate = reservation.reservation_date.toJSON();
-      reservationDate = reservationDate.slice(0, reservationDate.indexOf("T"))
+      const year = reservation.reservation_date.getFullYear();
+      const month = (reservation.reservation_date.getMonth() + 1).toString().padStart(2, "0");
+      const day = reservation.reservation_date.getDate().toString().padStart(2, "0");
+      const reservationDate = `${year}-${month}-${day}`;
       return reservationDate === date;
     });
     reservations = reservations.filter((reservation)=>reservation.status !== "finished");
