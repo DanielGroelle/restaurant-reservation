@@ -144,28 +144,26 @@ async function update(req, res, next) {
   
   //find the current reservation to make sure it exists
   const reservation = await reservationsService.read(givenTableData.reservation_id);
-  if (reservation) {
-
-    if (reservation.status === "seated") {
-      next({message: "reservation is already seated", status: 400});
-      return;
-    }
-
-    if (reservation.people > res.locals.foundTable.capacity) {
-      next({message: "table does not have sufficient capacity for reservation", status: 400});
-    }
-    //all validation passed, we can update the tableData with the new reservation_id
-    else {
-      await reservationsService.update(givenTableData.reservation_id, {
-        status: "seated"
-      });
-      const data = await tablesService.update(tableId, tableData);
-      res.status(200).json({data});
-    }
-  }
-  //if reservation_id doesnt exist
-  else {
+  if (!reservation) {
     next({message: `reservation_id does not exist: ${givenTableData.reservation_id}`, status: 404});
+    return;
+  }
+
+  if (reservation.status === "seated") {
+    next({message: "reservation is already seated", status: 400});
+    return;
+  }
+
+  if (reservation.people > res.locals.foundTable.capacity) {
+    next({message: "table does not have sufficient capacity for reservation", status: 400});
+  }
+  //all validation passed, we can update the tableData with the new reservation_id
+  else {
+    await reservationsService.update(givenTableData.reservation_id, {
+      status: "seated"
+    });
+    const data = await tablesService.update(tableId, tableData);
+    res.status(200).json({data});
   }
 }
 
