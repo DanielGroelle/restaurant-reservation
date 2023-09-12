@@ -1,5 +1,6 @@
 const tablesService = require("./tables.service");
 const reservationsService = require("../reservations/reservations.service");
+const asyncErrorBoundary = require("../errors/asyncErrorBoundary");
 
 /**
  * Middleware to check the :table_id parameter is valid,
@@ -193,6 +194,7 @@ async function deleteSeat(req, res, next) {
     next({message: "table is not occupied", status: 400});
   }
   else {
+    //set reservation to finished successfully
     await reservationsService.update(res.locals.foundTable.reservation_id, {
       status: "finished"
     });
@@ -202,11 +204,11 @@ async function deleteSeat(req, res, next) {
 }
 
 module.exports = {
-  list,
-  create: [hasTableName, hasCapacity, create],
-  read: [tableExists, read],
-  update: [tableExists, update],
-  destroy: [tableExists, destroy],
-  updateSeat: [tableExists, hasReservationId, update],
-  deleteSeat: [tableExists, deleteSeat]
+  list: [asyncErrorBoundary(list)],
+  create: [hasTableName, hasCapacity, asyncErrorBoundary(create)],
+  read: [tableExists, asyncErrorBoundary(read)],
+  update: [tableExists, asyncErrorBoundary(update)],
+  destroy: [tableExists, asyncErrorBoundary(destroy)],
+  updateSeat: [tableExists, hasReservationId, asyncErrorBoundary(update)],
+  deleteSeat: [tableExists, asyncErrorBoundary(deleteSeat)]
 };

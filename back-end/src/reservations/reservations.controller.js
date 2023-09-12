@@ -1,4 +1,5 @@
 const reservationsService = require("./reservations.service");
+const asyncErrorBoundary = require("../errors/asyncErrorBoundary");
 
 /**
  * Middleware to check the :reservation_id parameter is valid,
@@ -426,10 +427,10 @@ async function status(req, res, next) {
 }
 
 module.exports = {
-  list,
-  create: [hasFirstName, hasLastName, hasMobileNumber, hasReservationTime, hasReservationDate, hasPeople, create],
-  read: [reservationExists, read],
-  update: [reservationExists, hasFirstName, hasLastName, hasMobileNumber, hasReservationTime, hasReservationDate, hasPeople, update],
-  destroy: [reservationExists, destroy],
-  status: [reservationExists, status]
+  list: [asyncErrorBoundary(list)],
+  create: [hasFirstName, hasLastName, hasMobileNumber, hasReservationTime, hasReservationDate, hasPeople, asyncErrorBoundary(create)],
+  read: [reservationExists, asyncErrorBoundary(read)],
+  update: [reservationExists, hasFirstName, hasLastName, hasMobileNumber, hasReservationTime, hasReservationDate, hasPeople, asyncErrorBoundary(update)],
+  destroy: [reservationExists, asyncErrorBoundary(destroy)],
+  status: [reservationExists, asyncErrorBoundary(status)]
 };
