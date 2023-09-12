@@ -132,6 +132,7 @@ function hasReservationTime(req, res, next) {
 */
 function hasReservationDate(req, res, next) {
   const data = req.body.data;
+
   if (!data.reservation_date || data.reservation_date === "") {
     res.locals.errors.push({message: "reservation_date field missing", status: 400});
   }
@@ -157,8 +158,8 @@ function hasReservationDate(req, res, next) {
     res.locals.errors.push({message:"reservation cannot be on a tuesday - closed", status: 400});
   }
   
-  //if the date given is before today, only if we're not updating
-  if(date < today && !res.locals.foundReservation) {
+  //if the date given is before today
+  if(date < today) {
     res.locals.errors.push({message: "reservation must be in the future", status: 400});
   }
 
