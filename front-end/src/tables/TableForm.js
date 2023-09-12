@@ -3,6 +3,10 @@ import {useHistory} from "react-router-dom";
 import {fetchJson} from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
 
+/**
+ * Table form component
+ * @returns {JSX.Element}
+ */
 function TableForm() {
     const API_BASE_URL =
       process.env.REACT_APP_API_BASE_URL || "http://localhost:5001";
@@ -16,17 +20,19 @@ function TableForm() {
     const [formData, setFormData] = useState({...initialFormData});
     const [error, setError] = useState();
 
+    //handle change event
     function handleChange(event) {
         let newFormData = {...formData};
         newFormData[event.target.name] = event.target.value;
         setFormData(newFormData);
     }
     
+    //handle submitting form data
     async function handleSubmit(event) {
         event.preventDefault();
-        //update the database with the new card data
 
         try {
+            //POST to /tables with form data
             await fetchJson(`${API_BASE_URL}/tables`, {
                 method: "POST",
                 headers: {
@@ -44,6 +50,7 @@ function TableForm() {
 
     return (
         <div>
+            {/*display errors from backend*/}
             <ErrorAlert error={error}/>
             
             <form className="d-flex flex-column" onSubmit={handleSubmit}>
