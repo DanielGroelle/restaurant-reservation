@@ -65,7 +65,7 @@ function Dashboard({ date }) {
     <main>
       <h1>Dashboard</h1>
       <div className="d-flex flex-column mb-3">
-        <h4 className="mb-0">Reservations for date</h4>
+        <h4 className="mb-0">Reservations for {date}</h4>
         {/*Displays reservation errors from fetching*/}
         <ErrorAlert error={reservationsError} />
         

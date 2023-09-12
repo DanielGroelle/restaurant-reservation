@@ -64,8 +64,10 @@ function TableForm() {
                 </label>
                 <input name="capacity" type="number" placeholder="0" required onChange={handleChange}/>
                 
-                <button type="submit" className="btn btn-primary">Submit</button>
-                <button type="button" className="btn btn-secondary" onClick={()=>history.goBack()}>Cancel</button>
+                <div className="d-flex">
+                    <button type="submit" className="btn btn-primary" style={{width: "80px"}}>Submit</button>
+                    <button type="button" className="btn btn-secondary" style={{width: "80px"}} onClick={()=>history.goBack()}>Cancel</button>
+                </div>
             </form>
         </div>
     );

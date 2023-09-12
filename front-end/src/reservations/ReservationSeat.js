@@ -75,13 +75,16 @@ function ReservationSeat() {
         <div>
             {/*display errors returned from backend*/}
             <ErrorAlert error={error}/>
-            <form onSubmit={handleSubmit}>
+            <form className="d-flex" onSubmit={handleSubmit}>
                 <select name="table_id" onChange={handleChange}>
                     {/*map over tables to generate JSX for each*/}
                     {tables.map((table)=><TableSelect table={table} key={table.table_id}/>)}
                 </select>
-                <button type="submit" className="btn btn-secondary">Submit</button>
-                <button type="button" className="btn btn-secondary" onClick={(()=>history.goBack())}>Cancel</button>
+
+                <div className="d-flex">
+                    <button type="submit" className="btn btn-secondary" style={{width: "80px"}}>Submit</button>
+                    <button type="button" className="btn btn-secondary" style={{width: "80px"}} onClick={(()=>history.goBack())}>Cancel</button>
+                </div>
             </form>
         </div>
     );
