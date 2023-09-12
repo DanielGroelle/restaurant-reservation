@@ -17,7 +17,7 @@ Pressing the Seat button on a booked reservation will bring the user to the rese
 
 ![reservation seat page](./images/reservation-seat-page.png "Reservation seat page")
 
-When creating a new reservation, the backend will perform validation on each key in the form data automatically and display an error if there are any. 
+When creating a new reservation or editing an existing one, the backend will perform validation on each key in the form data automatically and display an error if there are any. 
 
 ![empty reservation form](./images/reservation-form.png "Reservation create page")
 ![reservation form with filled in data](./images/reservation-edit.png "Reservation edit page")
